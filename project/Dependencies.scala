@@ -12,7 +12,9 @@ object Dependencies {
     lazy val logback = "1.4.7"
     lazy val log4cats = "2.5.0"
     lazy val `mu-rpc` = "0.30.3"
+    lazy val ciris = "2.3.2"
     lazy val pureconfig = "0.17.2"
+    lazy val `cats-retry` = "3.1.0"
     lazy val fs2 = "3.6.1"
     lazy val enumeratum = "1.7.3"
     lazy val sttp = "3.7.2"
@@ -23,6 +25,8 @@ object Dependencies {
     lazy val redis4cats = "1.1.1"
     lazy val `cats-tagless` = "0.14.0"
     lazy val derevo = "0.13.0"
+    lazy val weaver = "0.8.1"
+    lazy val `test-container` = "1.17.6"
     lazy val postgresql = "42.5.4"
   }
   trait LibGroup {
@@ -145,6 +149,81 @@ object Dependencies {
         override def all: Seq[ModuleID] = Seq(core, cats, pureconfig)
       }
     }
+  }
+
+  object Logging extends LibGroup {
+    lazy val log4cats: ModuleID = "org.typelevel" %% "log4cats-slf4j"  % Versions.log4cats
+    lazy val logback: ModuleID = "ch.qos.logback"  % "logback-classic" % Versions.logback
+    override def all: Seq[ModuleID] = Seq(log4cats, logback)
+  }
+
+  object Sttp extends LibGroup {
+    private def sttp(artifact: String): ModuleID =
+      "com.softwaremill.sttp.client3" %% artifact % Versions.sttp
+
+    lazy val circe: ModuleID = sttp("circe")
+    lazy val `fs2-backend`: ModuleID = sttp("async-http-client-backend-fs2")
+    override def all: Seq[ModuleID] = Seq(circe, `fs2-backend`)
+  }
+
+  object Circe extends LibGroup {
+    private def circe(artifact: String): ModuleID =
+      "io.circe" %% s"circe-$artifact" % Versions.circe
+
+    lazy val core: ModuleID = circe("core")
+    lazy val generic: ModuleID = circe("generic")
+    lazy val parser: ModuleID = circe("parser")
+    lazy val refined: ModuleID = circe("refined")
+    lazy val `generic-extras`: ModuleID = circe("generic-extras")
+    override def all: Seq[ModuleID] = Seq(core, generic, parser, refined, `generic-extras`)
+  }
+
+  object Enumeratum extends LibGroup {
+    private def enumeratum(artifact: String): ModuleID =
+      "com.beachape" %% artifact % Versions.enumeratum
+    lazy val core: ModuleID = enumeratum("enumeratum")
+    lazy val circe: ModuleID = enumeratum("enumeratum-circe")
+    lazy val cats: ModuleID = enumeratum("enumeratum-cats")
+    override def all: Seq[ModuleID] = Seq(core, circe, cats)
+  }
+
+  object Cats extends LibGroup {
+    lazy val retry: ModuleID = "com.github.cb372" %% "cats-retry"  % Versions.`cats-retry`
+    lazy val core: ModuleID = "org.typelevel"     %% "cats-core"   % Versions.cats
+    lazy val effect: ModuleID = "org.typelevel"   %% "cats-effect" % Versions.`cats-effect`
+    def all: Seq[ModuleID] = Seq(core, retry, effect)
+  }
+
+  object Ciris extends LibGroup {
+    private def ciris(artifact: String): ModuleID =
+      "is.cir" %% artifact % Versions.ciris
+
+    lazy val core: ModuleID = ciris("ciris")
+    lazy val enum: ModuleID = ciris("ciris-enumeratum")
+    lazy val refined: ModuleID = ciris("ciris-refined")
+    override def all: Seq[ModuleID] = Seq(core, enum, refined)
+  }
+
+  object Testing extends LibGroup {
+    lazy val `log4cats-noop`: ModuleID = "org.typelevel" %% "log4cats-noop" % Versions.log4cats
+    lazy val `refined-scalacheck`: ModuleID =
+      "eu.timepit" %% "refined-scalacheck" % Versions.refined
+    lazy val `weaver-cats`: ModuleID = "com.disneystreaming" %% "weaver-cats" % Versions.weaver
+    lazy val `weaver-discipline`: ModuleID =
+      "com.disneystreaming"                               %% "weaver-discipline" % Versions.weaver
+    lazy val `weaver-scala-check` = "com.disneystreaming" %% "weaver-scalacheck" % Versions.weaver
+    lazy val `test-container`: ModuleID =
+      "org.testcontainers"                           % "postgresql" % Versions.`test-container`
+    lazy val postgresql: ModuleID = "org.postgresql" % "postgresql" % Versions.postgresql
+    override def all: Seq[ModuleID] = Seq(
+      `log4cats-noop`,
+      `refined-scalacheck`,
+      `weaver-cats`,
+      `weaver-discipline`,
+      `weaver-scala-check`,
+      `test-container`,
+      postgresql,
+    )
   }
 
   object ch {

@@ -1,7 +1,6 @@
 import Dependencies.*
 
 ThisBuild / version := "0.1.0"
-
 ThisBuild / scalaVersion := "2.13.12"
 
 lazy val `task-management` =
@@ -10,17 +9,24 @@ lazy val `task-management` =
     .settings(
       name := "task-management"
     )
-    .aggregate(endpoints, supports, common)
+    .aggregate(
+      endpoints,
+      integrations,
+      supports,
+      common,
+    )
 
 lazy val common =
   project
     .in(file("common"))
     .settings(
-      name := "common"
-    )
-    .settings(
+      name := "common",
       libraryDependencies ++=
         Dependencies.io.circe.all ++
+          Dependencies.Cats.all ++
+          Dependencies.Enumeratum.all ++
+          Dependencies.Ciris.all ++
+          Dependencies.Circe.all ++
           eu.timepit.refined.all ++
           com.github.pureconfig.all ++
           com.beachape.enumeratum.all ++
@@ -34,9 +40,15 @@ lazy val common =
             dev.optics.monocle,
             Dependencies.io.estatico.newtype,
             Dependencies.io.github.jmcardon.`tsec-password`,
-          )
+          ),
     )
     .dependsOn(LocalProject("support_logback"))
+
+lazy val integrations = project
+  .in(file("integrations"))
+  .settings(
+    name := "integrations"
+  )
 
 lazy val supports = project
   .in(file("supports"))
@@ -49,6 +61,7 @@ lazy val endpoints = project
   .settings(
     name := "endpoints"
   )
+
 addCommandAlias(
   "styleCheck",
   "all scalafmtSbtCheck; scalafmtCheckAll; Test / compile; scalafixAll --check",

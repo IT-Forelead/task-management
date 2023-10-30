@@ -24,4 +24,11 @@ object AError {
     final case class AuthorizationException(cause: String) extends AuthError
     final case class PasswordDoesNotMatch(cause: String) extends AuthError
   }
+
+  sealed trait MessageError extends AError
+  object MessageError {
+    final case class UnknownSmsStatus(status: String) extends MessageError {
+      override def cause: String = s"Sms delivery status: $status"
+    }
+  }
 }
