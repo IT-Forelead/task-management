@@ -2,4 +2,6 @@ import Dependencies.*
 
 name := "sttp"
 
-libraryDependencies ++= Dependencies.Sttp.all ++ Dependencies.Logging.all
+libraryDependencies ++= com.softwaremill.sttp.all ++ Seq(
+  org.typelevel.log4cats
+)

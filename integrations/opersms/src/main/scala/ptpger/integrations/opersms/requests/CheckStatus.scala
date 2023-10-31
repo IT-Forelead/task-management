@@ -7,8 +7,8 @@ import sttp.model.Method
 import ptpger.integrations.opersms.domain.RequestId
 import ptpger.integrations.opersms.domain.StatusResponse
 import uz.scala.sttp.SttpRequest
-import ptpger.syntax.generic.genericSyntaxGenericTypeOps
-import ptpger.syntax.refined.commonSyntaxAutoUnwrapV
+import uz.scala.syntax.generic.genericSyntaxGenericTypeOps
+import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 case class CheckStatus(
     login: NonEmptyString,

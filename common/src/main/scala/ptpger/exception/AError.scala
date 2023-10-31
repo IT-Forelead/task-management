@@ -1,7 +1,5 @@
 package ptpger.exception
 
-import java.util.UUID
-
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps

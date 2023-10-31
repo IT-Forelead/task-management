@@ -1,7 +1,6 @@
 package ptpger.integrations.opersms
 
 import scala.concurrent.duration.DurationInt
-
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
@@ -16,7 +15,6 @@ import retry.RetryPolicy
 import uz.scala.sttp.SttpBackends
 import uz.scala.sttp.SttpClient
 import uz.scala.sttp.SttpClientAuth
-
 import ptpger.exception.AError
 import ptpger.integrations.opersms.domain.DeliveryStatus
 import ptpger.integrations.opersms.domain.RequestId
@@ -25,8 +23,8 @@ import ptpger.integrations.opersms.domain.SmsResponse
 import ptpger.integrations.opersms.requests.CheckStatus
 import ptpger.integrations.opersms.requests.SendSms
 import ptpger.integrations.opersms.retries.Retry
-import ptpger.refinements.Phone
-import ptpger.syntax.generic.genericSyntaxStringOps
+import ptpger.Phone
+import uz.scala.syntax.generic.genericSyntaxStringOps
 
 trait OperSmsClient[F[_]] {
   def send(

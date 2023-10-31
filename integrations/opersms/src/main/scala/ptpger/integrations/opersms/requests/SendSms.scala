@@ -8,8 +8,8 @@ import uz.scala.sttp.SttpRequest
 
 import ptpger.integrations.opersms.domain.SMS
 import ptpger.integrations.opersms.domain.SmsResponse
-import ptpger.syntax.generic.genericSyntaxGenericTypeOps
-import ptpger.syntax.refined.commonSyntaxAutoUnwrapV
+import uz.scala.syntax.generic.genericSyntaxGenericTypeOps
+import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 case class SendSms(
     login: NonEmptyString,

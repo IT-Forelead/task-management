@@ -3,8 +3,8 @@ package ptpger.integrations.opersms.domain
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 
-import ptpger.refinements.Phone
-import ptpger.syntax.refined.commonSyntaxAutoUnwrapV
+import ptpger.Phone
+import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 @JsonCodec
 case class SMS(

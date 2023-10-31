@@ -1,6 +1,6 @@
 import Dependencies.*
 
-ThisBuild / version := "0.1.0"
+ThisBuild / version      := "0.1.0"
 ThisBuild / scalaVersion := "2.13.12"
 
 lazy val `task-management` =
@@ -23,10 +23,6 @@ lazy val common =
       name := "common",
       libraryDependencies ++=
         Dependencies.io.circe.all ++
-          Dependencies.Cats.all ++
-          Dependencies.Enumeratum.all ++
-          Dependencies.Ciris.all ++
-          Dependencies.Circe.all ++
           eu.timepit.refined.all ++
           com.github.pureconfig.all ++
           com.beachape.enumeratum.all ++
@@ -35,6 +31,7 @@ lazy val common =
             uz.scala.common,
             org.typelevel.cats.core,
             org.typelevel.cats.effect,
+            com.github.cb372.retry,
             org.typelevel.log4cats,
             ch.qos.logback,
             dev.optics.monocle,
