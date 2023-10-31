@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  backend:
+    restart: always
+    container_name: task-management
+    hostname: task-management
+    image: task-management:latest
+    ports:
+      - "8000:8000"
+    environment:
+      ROOT_PATH: /opt/docker
+      APP_ENV: prod
+      TZ: "Asia/Tashkent"
+    volumes:
+      - "/srv/logs/task-management/:/opt/docker/logs/"
+      - "/srv/conf/task-management/:/opt/docker/conf/"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1G'
