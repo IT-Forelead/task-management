@@ -4,7 +4,7 @@ services:
     restart: always
     container_name: task-management
     hostname: task-management
-    image: task-management:latest
+    image: ptpger-endpoints:latest
     ports:
       - "8000:8000"
     environment:

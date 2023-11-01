@@ -27,6 +27,9 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class PersonId(value: UUID)
 
+  @derive(eqv, show, uuid)
+  @newtype case class TaskId(value: UUID)
+
   @newtype case class JwtAccessTokenKey(secret: NonEmptyString)
 
   object JwtAccessTokenKey {
