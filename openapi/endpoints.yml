@@ -39,6 +39,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthTokens"
+        "422":
+          description: invalid json params
         "403":
           description: Incorrect Login or password
   /auth/logout:
@@ -98,6 +100,8 @@ paths:
               schema:
                 type: string
                 format: uuid
+        "422":
+          description: invalid json params
         "403":
           description: Bearer token not found
   /tasks/{taskId}:
@@ -127,6 +131,61 @@ paths:
       responses:
         "202":
           description: successful operation
+        "422":
+          description: invalid json params
+        "403":
+          description: Bearer token not found
+  /tasks/comments:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: add comment to task
+      description: "add comment to task"
+      operationId: addTaskComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+        description: comment input for add comment to task
+        required: true
+      responses:
+        "201":
+          description: successful operation
+        "400":
+          description: bad request data
+        "422":
+          description: invalid json params
+        "403":
+          description: Bearer token not found
+  /tasks/comments/{taskId}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: get task comments
+      description: "fetch comments of task"
+      operationId: fetchTaskComments
+      parameters:
+        - name: taskId
+          in: path
+          description: 'The id of task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Comment"
         "403":
           description: Bearer token not found
 servers:
@@ -249,3 +308,37 @@ components:
           type: string
       xml:
         name: TaskInput
+    CommentInput:
+      type: object
+      required:
+        - taskId
+        - note
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        note:
+          type: string
+      xml:
+        name: CommentInput
+    Comment:
+      type: object
+      required:
+        - taskId
+        - note
+        - createdAt
+        - userId
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+        userId:
+          type: string
+          format: uuid
+      xml:
+        name: Comment
