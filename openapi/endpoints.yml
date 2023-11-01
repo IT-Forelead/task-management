@@ -1,0 +1,251 @@
+openapi: 3.0.0
+info:
+  description: "This is a sample help to grow server."
+  version: 1.0.2
+  title: Help to Grow
+  termsOfService: http://scala.uz
+  contact:
+    email: admin@scala.uz
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags: [
+  {
+    name: auth
+  },
+  {
+    name: tasks
+  }
+]
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Access token
+      description: "Login post for authentication"
+      operationId: authLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+        description: login and password for authentication
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "403":
+          description: Incorrect Login or password
+  /auth/logout:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - auth
+      summary: Logs out current logged in user session
+      description: "Logout"
+      operationId: logoutUser
+      responses:
+        "204":
+          description: successful operation
+        "403":
+          description: Bearer token not found
+  /tasks:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: all tasks in our system
+      description: "Fetch tasks"
+      operationId: getTasks
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Task"
+        "403":
+          description: Bearer token not found
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: create task
+      description: "Create task"
+      operationId: createTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+        description: task params for create
+        required: true
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        "403":
+          description: Bearer token not found
+  /tasks/{taskId}:
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: update task
+      description: "update task"
+      operationId: updateTask
+      parameters:
+        - name: taskId
+          in: path
+          description: 'The id of task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdateInput"
+        description: task params for update
+        required: true
+      responses:
+        "202":
+          description: successful operation
+        "403":
+          description: Bearer token not found
+servers:
+  - url: http://localhost:8000
+  - url: http://ptpger.iflead.uz/api/v1
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    #
+  schemas:
+    Login:
+      type: object
+      required:
+        - phone
+        - password
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+      xml:
+        name: Login
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      xml:
+        name: AuthTokens
+    Task:
+      type: object
+      required:
+        - taskId
+        - createdAt
+        - title
+        - filename
+        - dueDate
+        - status
+        - description
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        title:
+          type: string
+        filename:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: in_progress
+          enum:
+            - new
+            - in_progress
+            - complete
+            - on_hold
+        description:
+          type: string
+      xml:
+        name: Task
+    TaskUpdateInput:
+      type: object
+      required:
+        - title
+        - filename
+        - dueDate
+        - status
+        - description
+      properties:
+        title:
+          type: string
+        filename:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: in_progress
+          enum:
+            - new
+            - in_progress
+            - complete
+            - on_hold
+        description:
+          type: string
+      xml:
+        name: TaskUpdateInput
+    TaskInput:
+      type: object
+      required:
+        - title
+        - filename
+        - dueDate
+        - description
+      properties:
+        title:
+          type: string
+        filename:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+      xml:
+        name: TaskInput

@@ -4,10 +4,12 @@ import cats.effect.Async
 import cats.effect.Resource
 import skunk.Session
 
+import ptpger.repos.TasksRepository
 import ptpger.repos.UsersRepository
 
 case class Repositories[F[_]](
     users: UsersRepository[F],
+    tasks: TasksRepository[F],
   )
 object Repositories {
   def make[F[_]: Async](
@@ -16,5 +18,6 @@ object Repositories {
     ): Repositories[F] =
     Repositories(
       users = UsersRepository.make[F],
+      tasks = TasksRepository.make[F],
     )
 }

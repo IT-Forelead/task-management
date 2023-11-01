@@ -32,8 +32,7 @@ case class Environment[F[_]: Async: Logger: Dispatcher](
     auth: Auth[F, AuthedUser],
     middleware: server.AuthMiddleware[F, AuthedUser],
   ) {
-  private val Repositories(users) = repositories
-  private val algebras: Algebras[F] = Algebras[F](auth)
+  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories)
 
   lazy val toServer: ServerEnvironment[F] =
     ServerEnvironment(

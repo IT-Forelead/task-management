@@ -1,5 +1,7 @@
 package ptpger.exception
 
+import cats.MonadThrow
+import cats.implicits.catsSyntaxApplicativeErrorId
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.ConfiguredJsonCodec
 import io.circe.syntax.EncoderOps
@@ -14,6 +16,7 @@ object AError {
   val Prefix: String = "AError: "
   implicit val config: Configuration = Configuration.default.withDiscriminator("Kind")
 
+  final case class Internal(cause: String) extends AError
   sealed trait AuthError extends AError
   object AuthError {
     final case class NoSuchUser(cause: String) extends AuthError
