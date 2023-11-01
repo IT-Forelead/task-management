@@ -13,12 +13,10 @@ import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
 
-import ptpger.algebras.CommentAlgebra
 import ptpger.algebras.TaskAlgebra
 import ptpger.domain._
 final case class TasksRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
     tasks: TaskAlgebra[F],
-    comments: CommentAlgebra[F],
   )(implicit
     logger: Logger[F]
   ) extends Routes[F, AuthedUser] {
@@ -39,9 +37,9 @@ final case class TasksRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
       }
     case ar @ POST -> Root / "comments" as user =>
       ar.req.decodeR[CommentInput] { comment =>
-        comments.create(user.id, comment) >> Created()
+        tasks.addComment(user.id, comment) >> Created()
       }
     case GET -> Root / "comments" / UUIDVar(id) as _ =>
-      comments.get(id.coerce[TaskId]).flatMap(Ok(_))
+      tasks.getComments(id.coerce[TaskId]).flatMap(Ok(_))
   }
 }

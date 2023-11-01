@@ -2,7 +2,6 @@ package ptpger
 
 import cats.Monad
 
-import ptpger.algebras.CommentAlgebra
 import ptpger.algebras.TaskAlgebra
 import ptpger.auth.impl.Auth
 import ptpger.domain.AuthedUser
@@ -12,7 +11,6 @@ import ptpger.effects.GenUUID
 case class Algebras[F[_]](
     auth: Auth[F, AuthedUser],
     tasks: TaskAlgebra[F],
-    comments: CommentAlgebra[F],
   )
 
 object Algebras {
@@ -23,8 +21,7 @@ object Algebras {
     val Repositories(_, tasks, comments) = repositories
     Algebras[F](
       auth = auth,
-      tasks = TaskAlgebra.make[F](tasks),
-      comments = CommentAlgebra.make[F](comments),
+      tasks = TaskAlgebra.make[F](tasks, comments),
     )
   }
 }
