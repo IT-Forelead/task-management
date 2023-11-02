@@ -9,14 +9,9 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-tags: [
-  {
-    name: auth
-  },
-  {
-    name: tasks
-  }
-]
+tags:
+  - name: auth
+  - name: tasks
 paths:
   /auth/login:
     post:
