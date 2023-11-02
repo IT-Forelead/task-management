@@ -11,6 +11,7 @@ import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import ptpger.Phone
+import ptpger.domain.enums.Action
 import ptpger.domain.enums.Role
 import ptpger.domain.enums.TaskStatus
 import ptpger.effects.IsUUID
@@ -22,6 +23,7 @@ package object sql {
   val phone: Codec[Phone] = varchar.imap[Phone](identity(_))(_.value)
   val zonedDateTime: Codec[ZonedDateTime] = timestamptz.imap(_.toZonedDateTime)(_.toOffsetDateTime)
   val role: Codec[Role] = `enum`[Role](Role, Type("role"))
+  val action: Codec[Action] = `enum`[Action](Action, Type("task_action"))
   val status: Codec[TaskStatus] = `enum`[TaskStatus](TaskStatus, Type("status"))
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)

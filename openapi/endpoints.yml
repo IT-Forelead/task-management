@@ -188,6 +188,34 @@ paths:
                   $ref: "#/components/schemas/Comment"
         "403":
           description: Bearer token not found
+  /tasks/action-histories/{taskId}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: get task action histories
+      description: "fetch action histories of task"
+      operationId: fetchActionHistories
+      parameters:
+        - name: taskId
+          in: path
+          description: 'The id of task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ActionHistory"
+        "403":
+          description: Bearer token not found
 servers:
   - url: http://localhost:8000
   - url: http://ptpger.iflead.uz/api/v1
@@ -342,3 +370,32 @@ components:
           format: uuid
       xml:
         name: Comment
+    ActionHistory:
+      type: object
+      required:
+        - taskId
+        - createdAt
+        - action
+        - description
+        - userId
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        action:
+          type: string
+          example: assignment
+          enum:
+            - assignment
+            - change_status
+            - note
+        description:
+          type: string
+        userId:
+          type: string
+          format: uuid
+      xml:
+        name: ActionHistory

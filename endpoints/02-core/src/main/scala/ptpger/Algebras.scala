@@ -1,6 +1,6 @@
 package ptpger
 
-import cats.Monad
+import cats.MonadThrow
 
 import ptpger.algebras.TaskAlgebra
 import ptpger.auth.impl.Auth
@@ -14,14 +14,14 @@ case class Algebras[F[_]](
   )
 
 object Algebras {
-  def make[F[_]: Monad: Calendar: GenUUID](
+  def make[F[_]: MonadThrow: Calendar: GenUUID](
       auth: Auth[F, AuthedUser],
       repositories: Repositories[F],
     ): Algebras[F] = {
-    val Repositories(_, tasks, comments) = repositories
+    val Repositories(users, tasks, comments, actions) = repositories
     Algebras[F](
       auth = auth,
-      tasks = TaskAlgebra.make[F](tasks, comments),
+      tasks = TaskAlgebra.make[F](tasks, comments, actions, users),
     )
   }
 }

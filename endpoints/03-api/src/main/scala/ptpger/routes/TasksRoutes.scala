@@ -31,9 +31,9 @@ final case class TasksRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
       }
     case GET -> Root as _ =>
       tasks.get.flatMap(Ok(_))
-    case ar @ PUT -> Root / UUIDVar(id) as _ =>
+    case ar @ PUT -> Root / UUIDVar(id) as user =>
       ar.req.decodeR[TaskUpdateInput] { taskInput =>
-        tasks.update(id.coerce[TaskId], taskInput) >> Accepted()
+        tasks.update(id.coerce[TaskId], user.id, taskInput) >> Accepted()
       }
     case ar @ POST -> Root / "comments" as user =>
       ar.req.decodeR[CommentInput] { comment =>
@@ -41,5 +41,7 @@ final case class TasksRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
       }
     case GET -> Root / "comments" / UUIDVar(id) as _ =>
       tasks.getComments(id.coerce[TaskId]).flatMap(Ok(_))
+    case GET -> Root / "action-histories" / UUIDVar(id) as _ =>
+      tasks.getActionHistories(id.coerce[TaskId]).flatMap(Ok(_))
   }
 }

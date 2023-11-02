@@ -13,5 +13,5 @@ private[repos] object TaskCommentsSql extends Sql[TaskId] {
     sql"""INSERT INTO task_comments VALUES ($codec)""".command
 
   val select: Query[TaskId, Comment] =
-    sql"""SELECT * FROM task_comments WHERE id = $id""".query(codec)
+    sql"""SELECT * FROM task_comments WHERE task_id = $id""".query(codec)
 }
