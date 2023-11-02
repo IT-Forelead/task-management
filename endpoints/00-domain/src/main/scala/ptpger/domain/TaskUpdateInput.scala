@@ -1,16 +1,17 @@
 package ptpger.domain
 
+import java.time.LocalDate
+
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
-import ptpger.domain.enums.TaskStatus
 import io.circe.refined._
 
-import java.time.ZonedDateTime
+import ptpger.domain.enums.TaskStatus
 @JsonCodec
 case class TaskUpdateInput(
     title: NonEmptyString,
     filename: NonEmptyString,
-    dueDate: ZonedDateTime,
+    dueDate: LocalDate,
     userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,

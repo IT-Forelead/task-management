@@ -1,6 +1,6 @@
 package ptpger.domain
 
-import java.time.ZonedDateTime
+import java.time.LocalDate
 
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
@@ -10,6 +10,6 @@ import io.circe.refined._
 case class TaskInput(
     title: NonEmptyString,
     filename: NonEmptyString,
-    dueDate: ZonedDateTime,
+    dueDate: LocalDate,
     description: NonEmptyString,
   )

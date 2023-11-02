@@ -242,7 +242,7 @@ components:
           type: string
         dueDate:
           type: string
-          format: date-time
+          format: date
         userId:
           type: string
           format: uuid
@@ -273,7 +273,7 @@ components:
           type: string
         dueDate:
           type: string
-          format: date-time
+          format: date
         userId:
           type: string
           format: uuid
@@ -303,7 +303,7 @@ components:
           type: string
         dueDate:
           type: string
-          format: date-time
+          format: date
         description:
           type: string
       xml:

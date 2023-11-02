@@ -1,5 +1,6 @@
 package ptpger.domain
 
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 import eu.timepit.refined.types.string.NonEmptyString
@@ -13,7 +14,7 @@ case class Task(
     createdAt: ZonedDateTime,
     title: NonEmptyString,
     filename: NonEmptyString,
-    dueDate: ZonedDateTime,
+    dueDate: LocalDate,
     userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,
