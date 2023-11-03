@@ -15,6 +15,7 @@ import ptpger.repos.sql.AssetsSql
 trait AssetsRepository[F[_]] {
   def create(asset: Asset): F[Unit]
   def getAssets(assetIds: NonEmptyList[AssetId]): F[Map[AssetId, Asset]]
+  def findAsset(assetId: AssetId): F[Option[Asset]]
 }
 
 object AssetsRepository {
@@ -29,5 +30,8 @@ object AssetsRepository {
       val assets = assetIds.toList
       AssetsSql.getByIds(assets).queryList(assets).map(_.map(a => a.id -> a).toMap)
     }
+
+    override def findAsset(assetId: AssetId): F[Option[Asset]] =
+      AssetsSql.findById.queryOption(assetId)
   }
 }

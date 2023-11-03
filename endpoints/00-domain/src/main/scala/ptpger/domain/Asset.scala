@@ -1,5 +1,6 @@
 package ptpger.domain
 
+import java.net.URL
 import java.time.ZonedDateTime
 
 import cats.implicits.catsSyntaxTuple2Semigroupal
@@ -11,6 +12,7 @@ import io.circe.refined._
 import uz.scala.http4s.utils.MapConvert
 import uz.scala.http4s.utils.MapConvert.ValidationResult
 import uz.scala.syntax.refined._
+import uz.scala.syntax.circe._
 
 @JsonCodec
 case class Asset(
@@ -22,12 +24,18 @@ case class Asset(
   )
 
 object Asset {
-  case class AssetInfo(public: Boolean, filename: Option[NonEmptyString])
+  case class AssetInput(public: Boolean, filename: Option[NonEmptyString])
+  @JsonCodec
+  case class AssetInfo(
+      public: Boolean,
+      filename: Option[NonEmptyString],
+      url: URL,
+    )
 
-  object AssetInfo {
-    implicit def decodeMap: MapConvert[ValidationResult[AssetInfo]] =
-      new MapConvert[ValidationResult[AssetInfo]] {
-        override def fromMap(values: Map[String, String]): ValidationResult[AssetInfo] =
+  object AssetInput {
+    implicit def decodeMap: MapConvert[ValidationResult[AssetInput]] =
+      new MapConvert[ValidationResult[AssetInput]] {
+        override def fromMap(values: Map[String, String]): ValidationResult[AssetInput] =
           (
             values
               .get("public")
@@ -37,7 +45,7 @@ object Asset {
                 .unless(filename.isBlank)(filename: NonEmptyString)
                 .fold("age isn't defined".invalidNec[NonEmptyString])(_.validNec[String])
             },
-          ).mapN(AssetInfo.apply)
+          ).mapN(AssetInput.apply)
       }
   }
 }

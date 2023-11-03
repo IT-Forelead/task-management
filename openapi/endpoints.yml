@@ -217,7 +217,7 @@ paths:
       security:
         - bearerAuth: [ ]
       tags:
-        - tasks
+        - assets
       summary: upload file to system
       description: "Upload file"
       operationId: uploadAsset
@@ -225,7 +225,7 @@ paths:
         content:
           multipart/form-data: # Media type
             schema: # Request payload
-              $ref: "#/components/schemas/AssetInfo"
+              $ref: "#/components/schemas/AssetInput"
         description: form data for upload file
         required: true
       responses:
@@ -242,6 +242,32 @@ paths:
           description: Bearer token not found
         "422":
           description: Invalid form data entered
+  /assets/{assetId}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - assets
+      summary: get task action histories
+      description: "fetch action histories of task"
+      operationId: fetchActionHistories
+      parameters:
+        - name: assetId
+          in: path
+          description: 'The id of asset'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetInfo"
+        "403":
+          description: Bearer token not found
 servers:
   - url: http://localhost:8000
   - url: http://ptpger.iflead.uz/api/v1
@@ -447,18 +473,33 @@ components:
           type: string
       xml:
         name: Asset
+    AssetInput:
+      type: object
+      required:
+        - public
+        - file
+      properties:
+        public:
+          type: boolean
+        filename:
+          type: string
+        file:
+          type: string
+          format: binary
+      xml:
+        name: AssetInput
     AssetInfo:
       type: object
       required:
         - public
         - file
-      properties: # Request parts
-        public: # Part 1 (string value)
+      properties:
+        public:
           type: boolean
-        filename: # Part2 (object)
+        filename:
           type: string
-        file: # Part 3 (an image)
+        url:
           type: string
-          format: binary
+          format: url
       xml:
         name: AssetInfo

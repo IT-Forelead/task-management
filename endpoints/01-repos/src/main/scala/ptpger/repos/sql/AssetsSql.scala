@@ -14,4 +14,7 @@ private[repos] object AssetsSql extends Sql[AssetId] {
 
   def getByIds(assetIds: List[AssetId]): Query[assetIds.type, Asset] =
     sql"""SELECT * FROM assets WHERE id in ${id.values.list(assetIds)}""".query(codec)
+
+  val findById: Query[AssetId, Asset] =
+    sql"""SELECT * FROM assets WHERE id = $id LIMIT 1""".query(codec)
 }

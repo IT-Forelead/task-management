@@ -5,6 +5,7 @@ import cats.data.OptionT
 import cats.effect.kernel.Concurrent
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec._
@@ -14,7 +15,7 @@ import uz.scala.http4s.syntax.all.http4SyntaxPartOps
 import uz.scala.http4s.utils.Routes
 
 import ptpger.algebras.AssetsAlgebra
-import ptpger.domain.Asset.AssetInfo
+import ptpger.domain.Asset.AssetInput
 import ptpger.domain._
 final case class RootRoutes[
     F[_]: JsonDecoder: MonadThrow: Concurrent: Lambda[M[_] => fs2.Compiler[M, M]]
@@ -29,12 +30,14 @@ final case class RootRoutes[
     case ar @ POST -> Root / "assets" as _ =>
       ar.req.decode[Multipart[F]] { multipart =>
         for {
-          assetInfo <- multipart.parts.textParts.convert[AssetInfo]
+          assetInfo <- multipart.parts.textParts.convert[AssetInput]
           result <- OptionT(assets.uploadFile(multipart.parts.fileParts, assetInfo.public))
             .foldF(BadRequest("File part not exists!")) { fileKey =>
               assets.create(assetInfo, fileKey).flatMap(Created(_))
             }
         } yield result
       }
+    case GET -> Root / "assets" / UUIDVar(id) as _ =>
+      assets.getPublicUrl(id.coerce[AssetId]).flatMap(Ok(_))
   }
 }
