@@ -4,7 +4,7 @@ object Dependencies {
   object Versions {
     lazy val circe = "0.14.1"
     lazy val skunk = "0.6.0"
-    lazy val http4s = "0.23.10"
+    lazy val http4s = "0.23.23"
     lazy val flyway = "9.16.0"
     lazy val refined = "0.10.2"
     lazy val cats = "2.9.0"

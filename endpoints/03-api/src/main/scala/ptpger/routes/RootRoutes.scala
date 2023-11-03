@@ -22,7 +22,7 @@ final case class RootRoutes[
   ](
     assets: AssetsAlgebra[F]
   ) extends Routes[F, AuthedUser] {
-  override val path = "/tasks"
+  override val path = "/"
 
   override val public: HttpRoutes[F] = HttpRoutes.empty[F]
 
@@ -30,7 +30,7 @@ final case class RootRoutes[
     case ar @ POST -> Root / "assets" as _ =>
       ar.req.decode[Multipart[F]] { multipart =>
         for {
-          assetInfo <- multipart.parts.textParts.convert[AssetInput]
+          assetInfo <- multipart.parts.convert[AssetInput]
           result <- OptionT(assets.uploadFile(multipart.parts.fileParts, assetInfo.public))
             .foldF(BadRequest("File part not exists!")) { fileKey =>
               assets.create(assetInfo, fileKey).flatMap(Created(_))

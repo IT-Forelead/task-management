@@ -99,15 +99,11 @@ final class RequestOps[F[_]: JsonDecoder: MonadThrow](private val request: Reque
 
 final class PartOps[F[_]](private val parts: Vector[Part[F]]) {
   private def filterFileTypes(part: Part[F]): Boolean = part.filename.exists(_.trim.nonEmpty)
-
   def fileParts: Vector[Part[F]] = parts.filter(filterFileTypes)
-
   def fileParts(mediaType: MediaType): Vector[Part[F]] =
     parts.filter(_.headers.get[`Content-Type`].exists(_.mediaType == mediaType))
 
-  def isFilePartExists: Boolean = parts.exists(filterFileTypes)
-
-  def textParts: Vector[Part[F]] = parts.filterNot(filterFileTypes)
+  private def textParts: Vector[Part[F]] = parts.filter(_.name.exists(_.trim.nonEmpty))
 
   def convert[A](
       implicit

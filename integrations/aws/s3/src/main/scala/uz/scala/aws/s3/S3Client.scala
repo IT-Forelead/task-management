@@ -12,6 +12,7 @@ import cats.effect.Resource
 import cats.effect.Sync
 import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.catsSyntaxFlatMapOps
+import com.amazonaws.HttpMethod
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
@@ -59,9 +60,6 @@ object S3Client {
       transferManager <- Resource.make(acquireTransferManager[F](awsConfig))(shutdown[F])
     } yield new S3ClientImpl[F](awsConfig, transferManager)
 
-  def stream[F[_]: Async](awsConfig: AWSConfig): Stream[F, S3Client[F]] =
-    Stream.resource(S3Client.resource[F](awsConfig))
-
   private def acquireTransferManager[F[_]](
       awsConfig: AWSConfig
     )(implicit
@@ -72,7 +70,7 @@ object S3Client {
   private def shutdown[F[_]](tm: TransferManager)(implicit F: Sync[F]): F[Unit] =
     F.delay(tm.shutdownNow())
 
-  private class S3ClientImpl[F[_]: Async] private[s3](
+  private class S3ClientImpl[F[_]: Async] private[s3] (
       awsConfig: AWSConfig,
       transferManager: TransferManager,
     )(implicit
@@ -85,7 +83,7 @@ object S3Client {
     }
 
     private def expireTime(): Date =
-      Date.from(LocalDateTime.now().plusSeconds(60).atZone(ZoneId.systemDefault).toInstant)
+      Date.from(LocalDateTime.now().plusMinutes(60).atZone(ZoneId.systemDefault).toInstant)
 
     /** Uploads a file in a single request. Suitable for small files.
       *
@@ -233,7 +231,13 @@ object S3Client {
     override def listBuckets: Stream[F, Bucket] =
       Stream.fromIterator(transferManager.getAmazonS3Client.listBuckets().asScala.iterator, 1024)
 
-    override def objectUrl(key: String): F[URL] =
-      F.delay(transferManager.getAmazonS3Client.getUrl(awsConfig.bucketName, key))
+    override def objectUrl(key: String): F[URL] = {
+      val presignedUrlRequest =
+        new GeneratePresignedUrlRequest(awsConfig.bucketName, key)
+          .withMethod(HttpMethod.GET)
+          .withExpiration(expireTime())
+
+      F.delay(transferManager.getAmazonS3Client.generatePresignedUrl(presignedUrlRequest))
+    }
   }
 }

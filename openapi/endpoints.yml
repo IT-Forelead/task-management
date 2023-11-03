@@ -250,7 +250,7 @@ paths:
         - assets
       summary: get task action histories
       description: "fetch action histories of task"
-      operationId: fetchActionHistories
+      operationId: fetchAsset
       parameters:
         - name: assetId
           in: path
@@ -286,8 +286,10 @@ components:
       properties:
         phone:
           type: string
+          example: "+998901234567"
         password:
           type: string
+          example: "Secret1!"
       xml:
         name: Login
     AuthTokens:
