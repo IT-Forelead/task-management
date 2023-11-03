@@ -2,8 +2,9 @@ package ptpger.auth.utils
 
 import cats.effect.Sync
 import cats.implicits.toFunctorOps
-import ptpger.domain.TokenExpiration
 import pdi.jwt.JwtClaim
+
+import ptpger.domain.TokenExpiration
 
 trait JwtExpire[F[_]] {
   def expiresIn(claim: JwtClaim, exp: TokenExpiration): F[JwtClaim]

@@ -8,6 +8,15 @@ import dev.profunktor.auth.AuthHeaders
 import dev.profunktor.auth.jwt.JwtAuth
 import dev.profunktor.auth.jwt.JwtSymmetricAuth
 import dev.profunktor.auth.jwt.JwtToken
+import org.http4s.Request
+import org.typelevel.log4cats.Logger
+import pdi.jwt.JwtAlgorithm
+import tsec.passwordhashers.jca.SCrypt
+import uz.scala.redis.RedisClient
+import uz.scala.syntax.all.circeSyntaxDecoderOps
+import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
+
 import ptpger.Phone
 import ptpger.auth.AuthConfig
 import ptpger.auth.utils.AuthMiddleware
@@ -19,14 +28,6 @@ import ptpger.domain.auth.AuthTokens
 import ptpger.domain.auth.Credentials
 import ptpger.exception.AError.AuthError
 import ptpger.exception.AError.AuthError._
-import org.http4s.Request
-import org.typelevel.log4cats.Logger
-import pdi.jwt.JwtAlgorithm
-import tsec.passwordhashers.jca.SCrypt
-import uz.scala.redis.RedisClient
-import uz.scala.syntax.all.circeSyntaxDecoderOps
-import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 trait Auth[F[_], A] {
   def login(credentials: Credentials): F[AuthTokens]

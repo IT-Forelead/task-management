@@ -5,7 +5,8 @@ name := "endpoints"
 lazy val `endpoints-domain` = project
   .in(file("00-domain"))
   .dependsOn(
-    LocalProject("common")
+    LocalProject("common"),
+    LocalProject("support_services"),
   )
 
 lazy val `endpoints-repos` =
@@ -29,6 +30,7 @@ lazy val `endpoints-core` =
     )
     .dependsOn(
       `endpoints-repos`,
+      LocalProject("integration_aws-s3"),
       LocalProject("support_redis"),
     )
 
@@ -39,8 +41,7 @@ lazy val `endpoints-api` =
       libraryDependencies ++= Seq()
     )
     .dependsOn(
-      LocalProject("support_services"),
-      `endpoints-core`,
+      `endpoints-core`
     )
 
 lazy val `endpoints-server` =

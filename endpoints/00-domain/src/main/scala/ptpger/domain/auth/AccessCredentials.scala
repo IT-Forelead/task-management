@@ -8,7 +8,6 @@ import io.circe.generic.semiauto.deriveEncoder
 import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 
-
 case class AccessCredentials[+U](data: U, password: PasswordHash[SCrypt])
 object AccessCredentials {
   implicit def encoder[U: Encoder]: Encoder.AsObject[AccessCredentials[U]] =

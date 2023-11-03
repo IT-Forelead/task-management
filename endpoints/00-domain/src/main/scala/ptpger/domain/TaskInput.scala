@@ -9,7 +9,7 @@ import io.circe.refined._
 @JsonCodec
 case class TaskInput(
     title: NonEmptyString,
-    filename: NonEmptyString,
+    assetId: AssetId,
     dueDate: LocalDate,
     description: NonEmptyString,
   )

@@ -12,6 +12,7 @@ info:
 tags:
   - name: auth
   - name: tasks
+  - name: assets
 paths:
   /auth/login:
     post:
@@ -211,6 +212,36 @@ paths:
                   $ref: "#/components/schemas/ActionHistory"
         "403":
           description: Bearer token not found
+  /assets:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: upload file to system
+      description: "Upload file"
+      operationId: uploadAsset
+      requestBody:
+        content:
+          multipart/form-data: # Media type
+            schema: # Request payload
+              $ref: "#/components/schemas/AssetInfo"
+        description: form data for upload file
+        required: true
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        "400":
+          description: File part not exists!
+        "403":
+          description: Bearer token not found
+        "422":
+          description: Invalid form data entered
 servers:
   - url: http://localhost:8000
   - url: http://ptpger.iflead.uz/api/v1
@@ -394,3 +425,40 @@ components:
           format: uuid
       xml:
         name: ActionHistory
+    Asset:
+      type: object
+      required:
+        - id
+        - createdAt
+        - s3Key
+        - public
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        s3Key:
+          type: string
+        public:
+          type: boolean
+        fileName:
+          type: string
+      xml:
+        name: Asset
+    AssetInfo:
+      type: object
+      required:
+        - public
+        - file
+      properties: # Request parts
+        public: # Part 1 (string value)
+          type: boolean
+        filename: # Part2 (object)
+          type: string
+        file: # Part 3 (an image)
+          type: string
+          format: binary
+      xml:
+        name: AssetInfo

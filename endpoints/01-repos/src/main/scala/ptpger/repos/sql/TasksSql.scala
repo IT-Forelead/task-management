@@ -8,7 +8,7 @@ import ptpger.domain.Task
 import ptpger.domain.TaskId
 private[repos] object TasksSql extends Sql[TaskId] {
   private val codec =
-    (id *: zonedDateTime *: nes *: nes *: date *: UsersSql.id.opt *: status *: nes)
+    (id *: zonedDateTime *: nes *: date *: UsersSql.id.opt *: status *: nes *: AssetsSql.id)
       .to[Task]
 
   val insert: Command[Task] =
@@ -23,7 +23,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
   val update: Command[Task] =
     sql"""UPDATE tasks 
          SET title = $nes,
-         filename = $nes,
+         asset_id = ${AssetsSql.id},
          due_date = $date,
          user_id = ${UsersSql.id.opt},
          status = $status,
@@ -33,7 +33,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
       .command
       .contramap {
         case task: Task =>
-          task.title *: task.filename *: task.dueDate *: task.userId *: task.status *: task.description *: task.id *: EmptyTuple
+          task.title *: task.assetId *: task.dueDate *: task.userId *: task.status *: task.description *: task.id *: EmptyTuple
 
       }
 }

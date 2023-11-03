@@ -52,7 +52,7 @@ object TaskAlgebra {
             id = id,
             createdAt = now,
             title = taskInput.title,
-            filename = taskInput.filename,
+            assetId = taskInput.assetId,
             dueDate = taskInput.dueDate,
             userId = None,
             status = TaskStatus.New,
@@ -82,7 +82,7 @@ object TaskAlgebra {
             )
           } yield task.copy(
             title = taskInput.title,
-            filename = taskInput.filename,
+            assetId = taskInput.assetId,
             dueDate = taskInput.dueDate,
             userId = taskInput.userId,
             status = taskInput.status,

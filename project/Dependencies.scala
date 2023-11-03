@@ -28,11 +28,27 @@ object Dependencies {
     lazy val weaver = "0.8.1"
     lazy val `test-container` = "1.17.6"
     lazy val postgresql = "42.5.4"
+    lazy val awsSdk = "1.12.111"
+    lazy val awsSoftwareS3 = "2.20.68"
+    lazy val guava = "31.0.1-jre"
   }
   trait LibGroup {
     def all: Seq[ModuleID]
   }
   object com {
+    object amazonaws extends LibGroup {
+      private def awsJdk(artifact: String): ModuleID =
+        "com.amazonaws" % artifact % Versions.awsSdk
+
+      lazy val awsCore: ModuleID = awsJdk("aws-java-sdk-core")
+      lazy val awsS3: ModuleID = awsJdk("aws-java-sdk-s3")
+      val awsSoftwareS3: ModuleID = "software.amazon.awssdk" % "s3" % Versions.awsSoftwareS3
+
+      override def all: Seq[ModuleID] = Seq(awsCore, awsS3, awsSoftwareS3)
+    }
+    object google {
+      lazy val guava = "com.google.guava" % "guava" % Versions.guava
+    }
     object github {
       object pureconfig extends LibGroup {
         private def repo(artifact: String): ModuleID =

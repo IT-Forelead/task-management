@@ -28,5 +28,4 @@ object AuthedUser {
       role: Role,
       phone: Phone,
     ) extends AuthedUser
-
 }

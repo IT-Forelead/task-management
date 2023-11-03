@@ -13,9 +13,9 @@ case class Task(
     id: TaskId,
     createdAt: ZonedDateTime,
     title: NonEmptyString,
-    filename: NonEmptyString,
     dueDate: LocalDate,
     userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,
+    assetId: AssetId,
   )

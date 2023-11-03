@@ -6,6 +6,6 @@ object MapConvert {
   type ValidationResult[A] = ValidatedNec[String, A]
 }
 
-trait MapConvert[F[_], A] {
-  def fromMap(values: Map[String, String]): F[A]
+trait MapConvert[A] {
+  def fromMap(values: Map[String, String]): A
 }

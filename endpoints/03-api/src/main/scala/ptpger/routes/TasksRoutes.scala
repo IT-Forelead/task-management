@@ -1,6 +1,5 @@
 package ptpger.routes
 
-import cats.Monad
 import cats.MonadThrow
 import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
@@ -8,17 +7,14 @@ import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s.HttpRoutes
 import org.http4s.circe.JsonDecoder
-import org.typelevel.log4cats.Logger
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
 
 import ptpger.algebras.TaskAlgebra
 import ptpger.domain._
-final case class TasksRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
-    tasks: TaskAlgebra[F],
-  )(implicit
-    logger: Logger[F]
+final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
+    tasks: TaskAlgebra[F]
   ) extends Routes[F, AuthedUser] {
   override val path = "/tasks"
 

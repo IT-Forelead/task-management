@@ -12,6 +12,7 @@ import eu.timepit.refined.pureconfig._
 import org.http4s.server
 import org.typelevel.log4cats.Logger
 import pureconfig.generic.auto.exportReader
+import uz.scala.aws.s3.S3Client
 import uz.scala.flyway.Migrations
 import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
@@ -30,9 +31,10 @@ case class Environment[F[_]: Async: Logger: Dispatcher](
     config: Config,
     repositories: Repositories[F],
     auth: Auth[F, AuthedUser],
+    s3Client: S3Client[F],
     middleware: server.AuthMiddleware[F, AuthedUser],
   ) {
-  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories)
+  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client)
 
   lazy val toServer: ServerEnvironment[F] =
     ServerEnvironment(
@@ -61,5 +63,6 @@ object Environment {
       implicit0(dispatcher: Dispatcher[F]) <- Dispatcher.parallel[F]
       middleware = LiveMiddleware.make[F](config.auth, redis)
       auth = Auth.make[F](config.auth, findUser(repositories), redis)
-    } yield Environment[F](config, repositories, auth, middleware)
+      s3Client <- S3Client.resource(config.awsConfig)
+    } yield Environment[F](config, repositories, auth, s3Client, middleware)
 }

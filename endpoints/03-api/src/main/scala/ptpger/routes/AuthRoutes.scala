@@ -1,13 +1,11 @@
 package ptpger.routes
 
-import cats.Monad
 import cats.MonadThrow
 import cats.implicits.catsSyntaxApply
 import cats.implicits.toFlatMapOps
 import org.http4s.AuthedRoutes
 import org.http4s.HttpRoutes
 import org.http4s.circe.JsonDecoder
-import org.typelevel.log4cats.Logger
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
@@ -16,10 +14,8 @@ import ptpger.auth.impl.Auth
 import ptpger.domain.AuthedUser
 import ptpger.domain.auth.Credentials
 
-final case class AuthRoutes[F[_]: Monad: JsonDecoder: MonadThrow](
+final case class AuthRoutes[F[_]: JsonDecoder: MonadThrow](
     auth: Auth[F, AuthedUser]
-  )(implicit
-    logger: Logger[F]
   ) extends Routes[F, AuthedUser] {
   override val path = "/auth"
 

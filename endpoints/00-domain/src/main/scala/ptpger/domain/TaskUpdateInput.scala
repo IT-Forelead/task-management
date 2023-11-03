@@ -10,7 +10,7 @@ import ptpger.domain.enums.TaskStatus
 @JsonCodec
 case class TaskUpdateInput(
     title: NonEmptyString,
-    filename: NonEmptyString,
+    assetId: AssetId,
     dueDate: LocalDate,
     userId: Option[PersonId],
     status: TaskStatus,
