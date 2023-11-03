@@ -9,6 +9,10 @@ import cats.implicits.toTraverseOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import ptpger.domain._
+import ptpger.domain.args.tasks.CommentInput
+import ptpger.domain.args.tasks.TaskFilters
+import ptpger.domain.args.tasks.TaskInput
+import ptpger.domain.args.tasks.TaskUpdateInput
 import ptpger.domain.enums.Action
 import ptpger.domain.enums.Assignment
 import ptpger.domain.enums.Assignment.Assigned
@@ -25,7 +29,7 @@ import ptpger.utils.ID
 
 trait TaskAlgebra[F[_]] {
   def create(taskInput: TaskInput): F[TaskId]
-  def get: F[List[Task]]
+  def get(filters: TaskFilters): F[List[Task]]
   def update(
       id: TaskId,
       userId: PersonId,
@@ -61,8 +65,8 @@ object TaskAlgebra {
           _ <- tasksRepository.create(task)
         } yield id
 
-      override def get: F[List[Task]] =
-        tasksRepository.get
+      override def get(filters: TaskFilters): F[List[Task]] =
+        tasksRepository.get(filters)
 
       override def update(
           id: TaskId,

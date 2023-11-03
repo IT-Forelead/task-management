@@ -1,4 +1,5 @@
 package ptpger.domain
+package args.tasks
 
 import java.time.LocalDate
 
@@ -7,6 +8,7 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import ptpger.domain.enums.TaskStatus
+
 @JsonCodec
 case class TaskUpdateInput(
     title: NonEmptyString,

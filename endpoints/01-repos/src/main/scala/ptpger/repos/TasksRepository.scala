@@ -8,15 +8,15 @@ import cats.implicits.toFlatMapOps
 import skunk._
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
-import uz.scala.skunk.syntax.all.skunkSyntaxQueryVoidOps
 
 import ptpger.domain.Task
 import ptpger.domain.TaskId
+import ptpger.domain.args.tasks.TaskFilters
 import ptpger.exception.AError
 import ptpger.repos.sql.TasksSql
 trait TasksRepository[F[_]] {
   def create(task: Task): F[Unit]
-  def get: F[List[Task]]
+  def get(filters: TaskFilters): F[List[Task]]
   def findById(taskId: TaskId): F[Option[Task]]
   def update(id: TaskId)(update: Task => F[Task]): F[Unit]
 }
@@ -28,8 +28,10 @@ object TasksRepository {
     ): TasksRepository[F] = new TasksRepository[F] {
     override def create(task: Task): F[Unit] =
       TasksSql.insert.execute(task)
-    override def get: F[List[Task]] =
-      TasksSql.select.all
+    override def get(filters: TaskFilters): F[List[Task]] = {
+      val query = TasksSql.select(filters)
+      query.fragment.query(TasksSql.codec).queryList(query.argument)
+    }
     override def findById(taskId: TaskId): F[Option[Task]] =
       TasksSql.findById.queryOption(taskId)
     override def update(id: TaskId)(update: Task => F[Task]): F[Unit] =

@@ -54,7 +54,7 @@ paths:
         "403":
           description: Bearer token not found
   /tasks:
-    get:
+    post:
       security:
         - bearerAuth: [ ]
       tags:
@@ -62,6 +62,13 @@ paths:
       summary: all tasks in our system
       description: "Fetch tasks"
       operationId: getTasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskFilters"
+        description: filters
+        required: true
       responses:
         "200":
           description: successful operation
@@ -73,6 +80,7 @@ paths:
                   $ref: "#/components/schemas/Task"
         "403":
           description: Bearer token not found
+  /tasks/create:
     post:
       security:
         - bearerAuth: [ ]
@@ -301,6 +309,30 @@ components:
           type: string
       xml:
         name: AuthTokens
+    TaskFilters:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: in_progress
+          enum:
+            - new
+            - in_progress
+            - complete
+            - on_hold
+        dueDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        assigned:
+          type: boolean
+      xml:
+        name: TaskFilters
     Task:
       type: object
       required:
@@ -344,15 +376,16 @@ components:
       type: object
       required:
         - title
-        - filename
+        - assetId
         - dueDate
         - status
         - description
       properties:
         title:
           type: string
-        filename:
+        assetId:
           type: string
+          format: uuid
         dueDate:
           type: string
           format: date
@@ -375,14 +408,15 @@ components:
       type: object
       required:
         - title
-        - filename
+        - assetId
         - dueDate
         - description
       properties:
         title:
           type: string
-        filename:
+        assetId:
           type: string
+          format: uuid
         dueDate:
           type: string
           format: date

@@ -1,4 +1,5 @@
 package ptpger.domain
+package args.tasks
 
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
