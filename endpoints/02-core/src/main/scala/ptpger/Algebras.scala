@@ -5,6 +5,7 @@ import uz.scala.aws.s3.S3Client
 
 import ptpger.algebras.AssetsAlgebra
 import ptpger.algebras.TaskAlgebra
+import ptpger.algebras.UsersAlgebra
 import ptpger.auth.impl.Auth
 import ptpger.domain.AuthedUser
 import ptpger.effects.Calendar
@@ -14,6 +15,7 @@ case class Algebras[F[_]](
     auth: Auth[F, AuthedUser],
     tasks: TaskAlgebra[F],
     assets: AssetsAlgebra[F],
+    users: UsersAlgebra[F],
   )
 
 object Algebras {
@@ -27,6 +29,7 @@ object Algebras {
       auth = auth,
       tasks = TaskAlgebra.make[F](tasks, comments, actions, users),
       assets = AssetsAlgebra.make[F](assets, s3Client),
+      users = UsersAlgebra.make[F](repositories.users),
     )
   }
 }

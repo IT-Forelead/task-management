@@ -30,6 +30,7 @@ object HttpModule {
         new AuthRoutes[F](env.algebras.auth),
         new TasksRoutes[F](env.algebras.tasks),
         new RootRoutes[F](env.algebras.assets),
+        new UsersRoutes[F](env.algebras.users),
       )
       .map { r =>
         Router(

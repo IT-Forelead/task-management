@@ -276,9 +276,38 @@ paths:
                 $ref: "#/components/schemas/AssetInfo"
         "403":
           description: Bearer token not found
+  /users:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      description: "Fetch users by users filter"
+      operationId: fetchUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserFilters"
+        description: User filters for fetch
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+        "403":
+          description: Bearer token not found
+        "422":
+          description: invalid json entered
+
 servers:
   - url: http://localhost:8000
-  - url: http://ptpger.iflead.uz/api/v1
+  - url: http://utg-urgench.iflead.uz/api/v1
 components:
   securitySchemes:
     bearerAuth: # arbitrary name for the security scheme
@@ -539,3 +568,40 @@ components:
           format: url
       xml:
         name: AssetInfo
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        firstname:
+          type: string
+        lastname:
+          type: string
+        role:
+          type: string
+          example: creator
+          enum:
+            - creator
+            - admin
+        phone:
+          type: string
+      xml:
+        name: User
+    UserFilters:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employment:
+          type: string
+          example: employed
+          enum:
+            - employed
+            - unemployed
+      xml:
+        name: UserFilters
