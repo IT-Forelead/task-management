@@ -6,12 +6,14 @@ import cats.effect.Async
 import cats.effect.Resource
 import cats.effect.std.Console
 import cats.effect.std.Dispatcher
+import cats.effect.std.Random
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.NoOp.instance
 import eu.timepit.refined.pureconfig._
 import org.http4s.server
 import org.typelevel.log4cats.Logger
 import pureconfig.generic.auto.exportReader
+import sttp.client3.httpclient.fs2.HttpClientFs2Backend
 import uz.scala.aws.s3.S3Client
 import uz.scala.flyway.Migrations
 import uz.scala.redis.RedisClient
@@ -25,16 +27,18 @@ import ptpger.auth.impl.LiveMiddleware
 import ptpger.domain.AuthedUser
 import ptpger.domain.auth.AccessCredentials
 import ptpger.http.{ Environment => ServerEnvironment }
+import ptpger.integrations.opersms.OperSmsClient
 import ptpger.utils.ConfigLoader
 
-case class Environment[F[_]: Async: Logger: Dispatcher](
+case class Environment[F[_]: Async: Logger: Dispatcher: Random](
     config: Config,
     repositories: Repositories[F],
     auth: Auth[F, AuthedUser],
     s3Client: S3Client[F],
+    operSmsClient: OperSmsClient[F],
     middleware: server.AuthMiddleware[F, AuthedUser],
   ) {
-  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client)
+  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client, operSmsClient)
 
   lazy val toServer: ServerEnvironment[F] =
     ServerEnvironment(
@@ -59,10 +63,14 @@ object Environment {
         Repositories.make[F]
       }
       redis <- Redis[F].utf8(config.redis.uri.toString).map(RedisClient[F](_, config.redis.prefix))
+      implicit0(random: Random[F]) <- Resource.eval(Random.scalaUtilRandom[F])
 
       implicit0(dispatcher: Dispatcher[F]) <- Dispatcher.parallel[F]
       middleware = LiveMiddleware.make[F](config.auth, redis)
       auth = Auth.make[F](config.auth, findUser(repositories), redis)
       s3Client <- S3Client.resource(config.awsConfig)
-    } yield Environment[F](config, repositories, auth, s3Client, middleware)
+      smsBroker <- HttpClientFs2Backend.resource[F]().map { implicit backend =>
+        OperSmsClient.make[F](config.opersms)
+      }
+    } yield Environment[F](config, repositories, auth, s3Client, smsBroker, middleware)
 }

@@ -7,6 +7,7 @@ import uz.scala.redis.RedisConfig
 import uz.scala.skunk.DataBaseConfig
 
 import ptpger.auth.AuthConfig
+import ptpger.integrations.opersms.OperSmsConfig
 
 case class Config(
     http: HttpServerConfig,
@@ -14,6 +15,7 @@ case class Config(
     auth: AuthConfig,
     redis: RedisConfig,
     awsConfig: AWSConfig,
+    opersms: OperSmsConfig,
   ) {
   lazy val migrations: MigrationsConfig = MigrationsConfig(
     hostname = database.host.value,

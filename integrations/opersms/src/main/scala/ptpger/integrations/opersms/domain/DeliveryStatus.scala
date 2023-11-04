@@ -2,15 +2,17 @@ package ptpger.integrations.opersms.domain
 
 import scala.collection.immutable
 
-import enumeratum.EnumEntry.Lowercase
+import enumeratum.EnumEntry.Snakecase
 import enumeratum._
 
-sealed trait DeliveryStatus extends EnumEntry with Lowercase
+sealed trait DeliveryStatus extends Snakecase
 
 object DeliveryStatus extends CirceEnum[DeliveryStatus] with Enum[DeliveryStatus] {
-  case object SENT extends DeliveryStatus
-  case object DELIVERED extends DeliveryStatus
-  case object FAILED extends DeliveryStatus
-  case object UNDEFINED extends DeliveryStatus
+  case object Sent extends DeliveryStatus
+  case object Delivered extends DeliveryStatus
+  case object NotDelivered extends DeliveryStatus
+  case object Failed extends DeliveryStatus
+  case object Transmitted extends DeliveryStatus
+  case object Undefined extends DeliveryStatus
   override def values: immutable.IndexedSeq[DeliveryStatus] = findValues
 }

@@ -2,21 +2,21 @@ package ptpger.integrations.opersms.domain
 
 import io.circe.generic.JsonCodec
 import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.ConfiguredJsonCodec
 
 import ptpger.integrations.opersms.domain.StatusResponse.SmsStatus
 
 @JsonCodec
 case class StatusResponse(
-    messages: Option[List[SmsStatus]] = None
+    messages: List[SmsStatus]
   )
 
 object StatusResponse {
-  @JsonCodec
+  @ConfiguredJsonCodec
   case class SmsStatus(
-      `message-id`: Int,
+      messageId: Int,
       channel: String,
-      status: String,
-      `status-date`: String,
+      status: DeliveryStatus,
     )
 
   object SmsStatus {

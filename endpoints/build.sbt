@@ -7,6 +7,7 @@ lazy val `endpoints-domain` = project
   .dependsOn(
     LocalProject("common"),
     LocalProject("support_services"),
+    LocalProject("integration_opersms"),
   )
 
 lazy val `endpoints-repos` =

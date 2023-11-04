@@ -1,30 +1,27 @@
 package ptpger.integrations.opersms
 
-import scala.concurrent.duration.DurationInt
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Sync
 import cats.effect.implicits.genSpawnOps
+import cats.effect.implicits.genTemporalOps_
 import cats.implicits._
 import eu.timepit.refined.types.string.NonEmptyString
 import org.typelevel.log4cats.Logger
-import retry.RetryPolicies.exponentialBackoff
-import retry.RetryPolicies.limitRetries
-import retry.RetryPolicy
+import uz.scala.sttp.CirceJsonResponse
 import uz.scala.sttp.SttpBackends
 import uz.scala.sttp.SttpClient
 import uz.scala.sttp.SttpClientAuth
-import ptpger.exception.AError
+import uz.scala.syntax.generic.genericSyntaxStringOps
+
+import ptpger.Phone
 import ptpger.integrations.opersms.domain.DeliveryStatus
 import ptpger.integrations.opersms.domain.RequestId
 import ptpger.integrations.opersms.domain.SMS
 import ptpger.integrations.opersms.domain.SmsResponse
 import ptpger.integrations.opersms.requests.CheckStatus
 import ptpger.integrations.opersms.requests.SendSms
-import ptpger.integrations.opersms.retries.Retry
-import ptpger.Phone
-import uz.scala.syntax.generic.genericSyntaxStringOps
 
 trait OperSmsClient[F[_]] {
   def send(
@@ -50,7 +47,7 @@ object OperSmsClient {
         changeStatus: DeliveryStatus => F[Unit],
       ): F[Unit] =
       Logger[F].info(
-        s"""Message sent to [${phone.value.maskMiddlePart(6)}], message text [ \n$text\n ]"""
+        s"""Sms sent to [${phone.value.maskMiddlePart(6)}], sms text [ \n$text\n ]"""
       )
   }
 
@@ -59,17 +56,15 @@ object OperSmsClient {
     )(implicit
       logger: Logger[F]
     ) extends OperSmsClient[F] {
-    private val retryPolicy: RetryPolicy[F] =
-      limitRetries[F](10) |+| exponentialBackoff[F](10.seconds)
-
-    private lazy val client: SttpClient.CirceJson[F] = SttpClient.circeJson(
+    private lazy val client: SttpClient[F, CirceJsonResponse] = SttpClient.circeJson(
       config.apiURL,
       SttpClientAuth.noAuth,
     )
-    private lazy val clientStatus: SttpClient.CirceJson[F] = SttpClient.circeJson(
+    private lazy val clientStatus: SttpClient[F, CirceJsonResponse] = SttpClient.circeJson(
       config.statusApiURL,
       SttpClientAuth.noAuth,
     )
+
     override def send(
         phone: Phone,
         text: NonEmptyString,
@@ -82,6 +77,8 @@ object OperSmsClient {
           config.password,
           NonEmptyList.one(SMS.unPlus(phone, text)),
         )
+        _ = println(sendSMS)
+        _ = println(config.apiURL)
         sms <- OptionT(client.request(sendSMS).map(_.headOption))
           .semiflatTap(smsResponse =>
             logger.info(
@@ -91,7 +88,7 @@ object OperSmsClient {
           .value
         _ <- sms.fold(Sync[F].unit)(smsResp =>
           Sync[F]
-            .delayBy(checkSmsStatus(smsResp, changeStatus), config.checkStatusTime.minutes)
+            .delayBy(checkSmsStatus(smsResp, changeStatus), config.checkStatusTime)
             .start
             .void
         )
@@ -104,48 +101,27 @@ object OperSmsClient {
     private def checkSmsStatus(
         smsResponse: SmsResponse,
         changeStatus: DeliveryStatus => F[Unit],
+        attempt: Int = 1,
       ): F[Unit] = {
       val smsStatus = CheckStatus(
         config.login,
         config.password,
-        NonEmptyList.one(RequestId(smsResponse.requestId.toString)),
+        NonEmptyList.one(RequestId(smsResponse.requestId)),
       )
-      val task = clientStatus
-        .request(smsStatus)
-        .flatMap { response =>
-          logger.info(s"======= SMS Status CRAZY RESPONSE: $response ========") *>
-            response
-              .messages
-              .fold(
-                AError
-                  .MessageError
-                  .UnknownSmsStatus("UNKNOWN")
-                  .raiseError[F, Unit]
-              ) { msg =>
-                msg.headOption.fold(Sync[F].unit) { smsStatus =>
-                  changeStatus(DeliveryStatus.withName(smsStatus.status.toLowerCase)) *>
-                    (if (
-                         DeliveryStatus
-                           .withName(smsStatus.status.toLowerCase) == DeliveryStatus.UNDEFINED
-                     )
-                       AError
-                         .MessageError
-                         .UnknownSmsStatus("UNKNOWN")
-                         .raiseError[F, Unit]
-                     else
-                       logger.info(s"Check SMS Status ${smsStatus.status}"))
-                }
-              }
-        }
-        .handleErrorWith { error =>
-          logger.error(error)("Error occurred while check sms status")
-        }
-      Retry[F]
-        .retry(retryPolicy)(task)
-        .handleErrorWith { error =>
-          logger.error(error)("Error occurred where check sms status loop")
-        }
-
+      for {
+        _ <- logger.info(s"Request to check sms status [${smsResponse.requestId}]")
+        _ <-
+          OptionT(clientStatus.request(smsStatus).map(_.messages.headOption))
+            .semiflatTap(smsStatus => changeStatus(smsStatus.status))
+            .cataF(
+              Sync[F].unit,
+              statusSmsResponse =>
+                checkSmsStatus(smsResponse, changeStatus, attempt + 1)
+                  .delayBy(config.checkStatusTime)
+                  .whenA(statusSmsResponse.status == DeliveryStatus.Undefined && attempt <= 3) >>
+                  logger.info(s"Check SMS Status ${statusSmsResponse.status}"),
+            )
+      } yield ()
     }
   }
 }

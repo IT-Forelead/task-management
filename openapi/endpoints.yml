@@ -279,7 +279,7 @@ paths:
   /users:
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - users
       description: "Fetch users by users filter"
@@ -304,7 +304,33 @@ paths:
           description: Bearer token not found
         "422":
           description: invalid json entered
-
+  /users/create:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - users
+      description: "Create User"
+      operationId: createUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+        description: User data for create
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        "403":
+          description: Bearer token not found
+        "422":
+          description: invalid json entered
 servers:
   - url: http://localhost:8000
   - url: http://utg-urgench.iflead.uz/api/v1
@@ -570,6 +596,13 @@ components:
         name: AssetInfo
     User:
       type: object
+      required:
+        - id
+        - createdAt
+        - firstname
+        - lastname
+        - role
+        - phone
       properties:
         id:
           type: string
@@ -605,3 +638,18 @@ components:
             - unemployed
       xml:
         name: UserFilters
+    UserInput:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - phone
+      properties:
+        phone:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+      xml:
+        name: UserInput

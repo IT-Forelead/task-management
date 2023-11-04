@@ -12,6 +12,7 @@ import uz.scala.http4s.utils.Routes
 import ptpger.algebras.UsersAlgebra
 import ptpger.domain._
 import ptpger.domain.args.users.UserFilters
+import ptpger.domain.args.users.UserInput
 final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
     users: UsersAlgebra[F]
   ) extends Routes[F, AuthedUser] {
@@ -23,6 +24,10 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
     case ar @ POST -> Root as _ =>
       ar.req.decodeR[UserFilters] { filters =>
         users.get(filters).flatMap(Ok(_))
+      }
+    case ar @ POST -> Root / "create" as _ =>
+      ar.req.decodeR[UserInput] { input =>
+        users.create(input).flatMap(Created(_))
       }
   }
 }
