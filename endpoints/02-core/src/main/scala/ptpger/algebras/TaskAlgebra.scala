@@ -131,7 +131,7 @@ object TaskAlgebra {
             description = assignment.description(user.firstname, user.lastname),
           )
           smsText =
-            s"http://utg-urgench.iflead.uz\n\nСизга топшириқ берилди"
+            s"\nСизга топшириқ берилди"
           _ <- messages.sendSms(user.phone, smsText)
           _ <- actionHistoriesRepository.create(action)
         } yield {}
