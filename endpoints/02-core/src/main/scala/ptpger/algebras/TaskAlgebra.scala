@@ -3,6 +3,7 @@ package ptpger.algebras
 import cats.MonadThrow
 import cats.data.OptionT
 import cats.implicits.catsSyntaxApplicativeByName
+import cats.implicits.catsSyntaxOptionId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
@@ -34,6 +35,11 @@ trait TaskAlgebra[F[_]] {
       id: TaskId,
       userId: PersonId,
       taskInput: TaskUpdateInput,
+    ): F[Unit]
+
+  def assign(
+      id: TaskId,
+      userId: PersonId,
     ): F[Unit]
 
   def addComment(userId: PersonId, comment: CommentInput): F[Unit]
@@ -92,6 +98,20 @@ object TaskAlgebra {
             userId = taskInput.userId,
             status = taskInput.status,
             description = taskInput.description,
+          )
+        }
+
+      override def assign(
+          id: TaskId,
+          userId: PersonId,
+        ): F[Unit] =
+        tasksRepository.update(id) { task =>
+          for {
+            _ <- taskAssignment(task.id, None, userId, Assigned).whenA(
+              task.userId.isEmpty
+            )
+          } yield task.copy(
+            userId = userId.some
           )
         }
 

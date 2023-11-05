@@ -30,7 +30,11 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
       ar.req.decodeR[TaskFilters] { filters =>
         tasks.get(filters).flatMap(Ok(_))
       }
-    case ar @ PUT -> Root / UUIDVar(id) as user =>
+    case ar @ PUT -> Root / UUIDVar(id) as task =>
+      ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
+        tasks.assign(id.coerce[TaskId], taskAssignInput.userId) >> Accepted()
+      }
+    case ar @ PUT -> Root / "edit" / UUIDVar(id) as user =>
       ar.req.decodeR[TaskUpdateInput] { taskInput =>
         tasks.update(id.coerce[TaskId], user.id, taskInput) >> Accepted()
       }
