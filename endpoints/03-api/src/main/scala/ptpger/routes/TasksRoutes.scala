@@ -3,6 +3,7 @@ package ptpger.routes
 import cats.MonadThrow
 import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
+import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s.HttpRoutes
@@ -30,9 +31,13 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
       ar.req.decodeR[TaskFilters] { filters =>
         tasks.get(filters).flatMap(Ok(_))
       }
-    case ar @ PUT -> Root / UUIDVar(id) as task =>
+    case ar @ PUT -> Root / UUIDVar(id) as user =>
       ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
-        tasks.assign(id.coerce[TaskId], taskAssignInput.userId) >> Accepted()
+        tasks.assign(
+          id.coerce[TaskId],
+          taskAssignInput.userId,
+          NonEmptyString.unsafeFrom(user.firstname + " " + user.lastname),
+        ) >> Accepted()
       }
     case ar @ PUT -> Root / "edit" / UUIDVar(id) as user =>
       ar.req.decodeR[TaskUpdateInput] { taskInput =>
