@@ -37,7 +37,7 @@ object Algebras {
     val messagesAlgebra = MessagesAlgebra.make[F](messages, operSmsClient)
     Algebras[F](
       auth = auth,
-      tasks = TaskAlgebra.make[F](tasks, comments, actions, users),
+      tasks = TaskAlgebra.make[F](tasks, comments, actions, users, messagesAlgebra),
       assets = AssetsAlgebra.make[F](assets, s3Client),
       users = UsersAlgebra.make[F](repositories.users, messagesAlgebra),
       messages = messagesAlgebra,

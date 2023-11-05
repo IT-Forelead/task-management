@@ -54,7 +54,7 @@ object UsersAlgebra {
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
           smsText =
-            s"Siz UzTransGaz platformasiga ro'yhatga olindingiz. Sizning\nlogin: ${user.phone}\npassword: $password"
+            s"http://utg-urgench.iflead.uz\n\nСиз платформага муаффакиятли рўйхатдан ўтдингиз\n\nлогин: ${user.phone}\nпарол: $password"
           _ <- messages.sendSms(user.phone, smsText)
         } yield id
     }

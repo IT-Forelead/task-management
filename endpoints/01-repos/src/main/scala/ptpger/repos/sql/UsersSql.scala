@@ -32,11 +32,11 @@ private[repos] object UsersSql extends Sql[PersonId] {
           WHERE id = $id LIMIT 1""".query(codec)
 
   val insert: Command[AccessCredentials[User]] =
-    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $role, $phone, $passwordHash)"""
+    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, $role, $passwordHash)"""
       .command
       .contramap { (u: AccessCredentials[User]) =>
-        u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.role *:
-          u.data.phone *: u.password *: EmptyTuple
+        u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.phone *:
+          u.data.role *: u.password *: EmptyTuple
       }
 
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =

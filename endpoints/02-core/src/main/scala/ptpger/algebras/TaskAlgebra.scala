@@ -46,6 +46,7 @@ object TaskAlgebra {
       taskCommentsRepository: TaskCommentsRepository[F],
       actionHistoriesRepository: ActionHistoriesRepository[F],
       usersRepository: UsersRepository[F],
+      messages: MessagesAlgebra[F],
     ): TaskAlgebra[F] =
     new TaskAlgebra[F] {
       override def create(taskInput: TaskInput): F[TaskId] =
@@ -129,6 +130,9 @@ object TaskAlgebra {
             action = Action.Assignment,
             description = assignment.description(user.firstname, user.lastname),
           )
+          smsText =
+            s"http://utg-urgench.iflead.uz\n\nСизга топшириқ берилди"
+          _ <- messages.sendSms(user.phone, smsText)
           _ <- actionHistoriesRepository.create(action)
         } yield {}
 
