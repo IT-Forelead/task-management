@@ -502,13 +502,15 @@ components:
     Counts:
       type: object
       required:
-        - totalCount
+        - count
         - new
         - inProgress
-        - complete
+        - completed
         - onHold
+        - rejected
+        - approved
       properties:
-        totalCount:
+        count:
           type: integer
           format: int32
         new:
@@ -517,10 +519,16 @@ components:
         inProgress:
           type: integer
           format: int32
-        complete:
+        completed:
           type: integer
           format: int32
         onHold:
+          type: integer
+          format: int32
+        rejected:
+          type: integer
+          format: int32
+        approved:
           type: integer
           format: int32
       xml:

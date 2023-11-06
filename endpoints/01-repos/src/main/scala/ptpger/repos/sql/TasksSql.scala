@@ -16,7 +16,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
       .to[Task]
 
   private[repos] val countsCodec =
-    (int4 *: int4 *: int4 *: int4 *: int4)
+    (int4 *: int4 *: int4 *: int4 *: int4 *: int4 *: int4)
       .to[Counts]
 
   val insert: Command[Task] =
@@ -51,11 +51,13 @@ private[repos] object TasksSql extends Sql[TaskId] {
 
   val count: Query[Void, Counts] =
     sql"""SELECT
-         COUNT(1) as total_count,
+         COUNT(1) as count,
          COUNT(1) filter (WHERE status = 'new') as "new",
          COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
-         COUNT(1) filter (WHERE status = 'complete') as complete,
+         COUNT(1) filter (WHERE status = 'completed') as completed,
          COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
+         COUNT(1) filter (WHERE status = 'rejected') as rejected,
+         COUNT(1) filter (WHERE status = 'approved') as approved,
          FROM tasks
        """.query(countsCodec)
 
