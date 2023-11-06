@@ -3,15 +3,21 @@ package ptpger.repos.sql
 import skunk._
 import skunk.codec.all.date
 import skunk.implicits._
+import skunk.codec.all.int4
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Task
 import ptpger.domain.TaskId
+import ptpger.domain.Counts
 import ptpger.domain.args.tasks.TaskFilters
 private[repos] object TasksSql extends Sql[TaskId] {
   private[repos] val codec =
     (id *: zonedDateTime *: nes *: date *: UsersSql.id.opt *: status *: nes *: AssetsSql.id)
       .to[Task]
+
+  private[repos] val countsCodec =
+    (int4 *: int4 *: int4 *: int4 *: int4)
+      .to[Counts]
 
   val insert: Command[Task] =
     sql"""INSERT INTO tasks VALUES ($codec)""".command
@@ -42,6 +48,16 @@ private[repos] object TasksSql extends Sql[TaskId] {
     val baseQuery: Fragment[Void] = sql"""SELECT * FROM tasks"""
     baseQuery(Void).whereAndOpt(searchFilter(filters))
   }
+
+  val count: Query[Void, Counts] =
+    sql"""SELECT
+         COUNT(1) as total_count,
+         COUNT(1) filter (WHERE status = 'new') as "new",
+         COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
+         COUNT(1) filter (WHERE status = 'complete') as complete,
+         COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
+         FROM tasks
+       """.query(countsCodec)
 
   val findById: Query[TaskId, Task] =
     sql"""SELECT * FROM tasks WHERE id = $id LIMIT 1""".query(codec)

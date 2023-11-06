@@ -32,6 +32,7 @@ import ptpger.utils.ID
 trait TaskAlgebra[F[_]] {
   def create(taskInput: TaskInput): F[TaskId]
   def get(filters: TaskFilters): F[List[Task]]
+  def getCounts: F[Counts]
   def update(
       id: TaskId,
       userId: PersonId,
@@ -76,6 +77,9 @@ object TaskAlgebra {
 
       override def get(filters: TaskFilters): F[List[Task]] =
         tasksRepository.get(filters)
+
+      override def getCounts: F[Counts] =
+        tasksRepository.getCounts
 
       override def update(
           id: TaskId,

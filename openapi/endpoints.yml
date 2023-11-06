@@ -80,6 +80,26 @@ paths:
                   $ref: "#/components/schemas/Task"
         "403":
           description: Bearer token not found
+  /tasks/counts:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: counts of all tasks in our system
+      description: "Fetch count of tasks"
+      operationId: getCounts
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Counts"
+        "403":
+          description: Bearer token not found
   /tasks/create:
     post:
       security:
@@ -479,6 +499,32 @@ components:
           type: string
       xml:
         name: TaskInput
+    Counts:
+      type: object
+      required:
+        - totalCount
+        - new
+        - inProgress
+        - complete
+        - onHold
+      properties:
+        totalCount:
+          type: integer
+          format: int32
+        new:
+          type: integer
+          format: int32
+        inProgress:
+          type: integer
+          format: int32
+        complete:
+          type: integer
+          format: int32
+        onHold:
+          type: integer
+          format: int32
+      xml:
+        name: Counts
     CommentInput:
       type: object
       required:
