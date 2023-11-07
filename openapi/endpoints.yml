@@ -234,7 +234,7 @@ paths:
           multipart/form-data: # Media type
             schema: # Request payload
               $ref: "#/components/schemas/AssetInput"
-        description: form data for upload file
+        description: form data for upload file. Allowed media types doc, docx, pdf, png, jpeg
         required: true
       responses:
         "201":
