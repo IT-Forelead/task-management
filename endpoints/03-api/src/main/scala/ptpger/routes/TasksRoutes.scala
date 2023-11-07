@@ -31,6 +31,8 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
       ar.req.decodeR[TaskFilters] { filters =>
         tasks.get(filters).flatMap(Ok(_))
       }
+    case GET -> Root / "counts" as _ =>
+      tasks.getCounts.flatMap(Ok(_))
     case ar @ PUT -> Root / UUIDVar(id) as user =>
       ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
         tasks.assign(
