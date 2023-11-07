@@ -28,7 +28,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
         .assigned
         .flatMap(cond => Option.when(cond)(()))
         .map(_ => sql"user_id IS NOT NULL".apply(Void)),
-      filters.userId.map(sql"user_id = ${UsersSql.id}"),
+//      filters.userId.map(sql"user_id = ${UsersSql.id}"),
       filters.status.map(sql"status = $status"),
     ) :::
       filters.dueDate.toList.flatMap { dateRange =>

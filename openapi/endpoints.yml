@@ -134,6 +134,37 @@ paths:
         - bearerAuth: [ ]
       tags:
         - tasks
+      summary: assign task to users
+      description: "assign task to users"
+      operationId: assignTask
+      parameters:
+        - name: taskId
+          in: path
+          description: 'The id of task'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskAssignInput"
+        description: assign task to users
+        required: true
+      responses:
+        "202":
+          description: successful operation
+        "422":
+          description: invalid json params
+        "403":
+          description: Bearer token not found
+  /tasks/edit/{taskId}:
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
       summary: update task
       description: "update task"
       operationId: updateTask
@@ -428,12 +459,10 @@ components:
           type: string
         assetId:
           type: string
+          format: uuid
         dueDate:
           type: string
           format: date
-        userId:
-          type: string
-          format: uuid
         status:
           type: string
           example: in_progress
@@ -462,9 +491,6 @@ components:
         dueDate:
           type: string
           format: date
-        userId:
-          type: string
-          format: uuid
         status:
           type: string
           example: in_progress
@@ -704,3 +730,15 @@ components:
           type: string
       xml:
         name: UserInput
+    TaskAssignInput:
+      type: object
+      required:
+        - userIds
+      properties:
+        userIds:
+          type: "array"
+          items:
+            type: string
+            format: uuid
+      xml:
+        name: TaskAssignInput

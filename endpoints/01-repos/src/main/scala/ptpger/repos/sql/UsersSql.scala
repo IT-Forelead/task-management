@@ -44,16 +44,16 @@ private[repos] object UsersSql extends Sql[PersonId] {
       filters.id.map(sql"u.id = $id"),
       filters.employment.map {
         case UserEmployment.Employed =>
-          sql"t.user_id IS NOT NULL".apply(Void)
+          sql"ut.user_id IS NOT NULL".apply(Void)
         case UserEmployment.Unemployed =>
-          sql"t.user_id IS NULL".apply(Void)
+          sql"ut.user_id IS NULL".apply(Void)
       },
     )
 
   def select(filters: UserFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
       sql"""SELECT DISTINCT ON(u.id) u.id, u.created_at, u.firstname, u.lastname, u.role, phone FROM users u
-           LEFT JOIN tasks t on t.user_id = u.id or t.user_id IS NULL
+           LEFT JOIN user_tasks ut on ut.user_id = u.id or ut.user_id IS NULL
          """
     baseQuery(Void).whereAndOpt(searchFilter(filters))
   }
