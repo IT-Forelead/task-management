@@ -3,6 +3,7 @@ package ptpger.effects
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Duration
 import java.time.ZonedDateTime
 
 import cats.effect._
@@ -13,6 +14,7 @@ trait Calendar[F[_]] {
   def currentDateTime: F[LocalDateTime]
   def currentZonedDateTime: F[ZonedDateTime]
   def currentInstant: F[Instant]
+  def remainingDays(dueDate: LocalDate): F[Long]
 }
 
 object Calendar {
@@ -31,5 +33,10 @@ object Calendar {
 
       override def currentInstant: F[Instant] =
         F.delay(Instant.now.noNanos)
+
+      override def remainingDays(dueDate: LocalDate): F[Long] =
+        F.map(currentDate) { current =>
+            Duration.between(current.atStartOfDay(), dueDate.atStartOfDay()).toDays
+        }
     }
 }

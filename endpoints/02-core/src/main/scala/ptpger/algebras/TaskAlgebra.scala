@@ -2,14 +2,13 @@ package ptpger.algebras
 
 import cats.Applicative
 import cats.MonadThrow
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, OptionT}
 import cats.implicits.catsSyntaxApplicativeByName
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
 import eu.timepit.refined.types.string.NonEmptyString
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import ptpger.domain._
 import ptpger.domain.args.tasks.CommentInput
 import ptpger.domain.args.tasks.TaskFilters
@@ -19,6 +18,7 @@ import ptpger.domain.enums.Action
 import ptpger.domain.enums.TaskStatus
 import ptpger.effects.Calendar
 import ptpger.effects.GenUUID
+import ptpger.exception.AError
 import ptpger.repos.ActionHistoriesRepository
 import ptpger.repos.TaskCommentsRepository
 import ptpger.repos.TasksRepository
@@ -133,7 +133,10 @@ object TaskAlgebra {
           author: NonEmptyString,
         ): F[Unit] =
         for {
+          taskDetails <- OptionT(tasksRepository.findById(taskId))
+            .getOrRaise(AError.Internal("Task by id not found"))
           now <- Calendar[F].currentZonedDateTime
+          days <- Calendar[F].remainingDays(taskDetails.dueDate)
           users <- usersRepository.findByIds(executorIds)
           _ <- users.toList.traverse {
             case executorId -> user =>
@@ -146,8 +149,9 @@ object TaskAlgebra {
                   action = Action.Assignment,
                   description = author, // assignment.description(user.firstname, user.lastname),
                 )
-                smsText =
-                  s"\nСизга топшириқ берилди"
+//                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $id\n").getOrElse("") TODO need link to get file
+                smsText = s"Сизга топшириқ берилди:\nТопшириқ номи: ${taskDetails.title}\nМуддат тугашига қолган вақт: $days кун"
+
                 _ <- messages.sendSms(user.phone, smsText)
                 _ <- actionHistoriesRepository.create(action)
               } yield {}
