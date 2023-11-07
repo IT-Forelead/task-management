@@ -14,7 +14,6 @@ case class TaskUpdateInput(
     title: NonEmptyString,
     assetId: Option[AssetId],
     dueDate: LocalDate,
-    userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,
   )

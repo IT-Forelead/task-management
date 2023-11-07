@@ -27,9 +27,9 @@ private[repos] object UsersSql extends Sql[PersonId] {
     sql"""SELECT id, created_at, firstname, lastname, role, phone, password FROM users
           WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
-  val findById: Query[PersonId, User] =
+  def findByIds(ids: List[PersonId]): Query[ids.type, User] =
     sql"""SELECT id, created_at, firstname, lastname, role, phone FROM users
-          WHERE id = $id LIMIT 1""".query(codec)
+          WHERE id IN ${id.values.list(ids)}""".query(codec)
 
   val insert: Command[AccessCredentials[User]] =
     sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, $role, $passwordHash)"""

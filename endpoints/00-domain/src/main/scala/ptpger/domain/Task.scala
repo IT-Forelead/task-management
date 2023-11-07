@@ -14,7 +14,6 @@ case class Task(
     createdAt: ZonedDateTime,
     title: NonEmptyString,
     dueDate: LocalDate,
-    userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,
     assetId: Option[AssetId],

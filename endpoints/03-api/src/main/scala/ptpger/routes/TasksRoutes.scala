@@ -37,7 +37,7 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
       ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
         tasks.assign(
           id.coerce[TaskId],
-          taskAssignInput.userId,
+          taskAssignInput.userIds,
           NonEmptyString.unsafeFrom(user.firstname + " " + user.lastname),
         ) >> Accepted()
       }

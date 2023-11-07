@@ -2,17 +2,17 @@ package ptpger.repos.sql
 
 import skunk._
 import skunk.codec.all.date
-import skunk.implicits._
 import skunk.codec.all.int8
+import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
+import ptpger.domain.Counts
 import ptpger.domain.Task
 import ptpger.domain.TaskId
-import ptpger.domain.Counts
 import ptpger.domain.args.tasks.TaskFilters
 private[repos] object TasksSql extends Sql[TaskId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: date *: UsersSql.id.opt *: status *: nes *: AssetsSql.id.opt)
+    (id *: zonedDateTime *: nes *: date *: status *: nes *: AssetsSql.id.opt)
       .to[Task]
 
   private[repos] val countsCodec =
@@ -69,7 +69,6 @@ private[repos] object TasksSql extends Sql[TaskId] {
          SET title = $nes,
          asset_id = ${AssetsSql.id.opt},
          due_date = $date,
-         user_id = ${UsersSql.id.opt},
          status = $status,
          description = $nes
          WHERE id = $id
@@ -77,7 +76,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
       .command
       .contramap {
         case task: Task =>
-          task.title *: task.assetId *: task.dueDate *: task.userId *: task.status *: task.description *: task.id *: EmptyTuple
+          task.title *: task.assetId *: task.dueDate *: task.status *: task.description *: task.id *: EmptyTuple
 
       }
 }

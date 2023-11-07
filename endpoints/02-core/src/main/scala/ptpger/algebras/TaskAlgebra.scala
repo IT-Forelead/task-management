@@ -1,9 +1,9 @@
 package ptpger.algebras
 
+import cats.Applicative
 import cats.MonadThrow
-import cats.data.OptionT
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxApplicativeByName
-import cats.implicits.catsSyntaxOptionId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
@@ -16,13 +16,9 @@ import ptpger.domain.args.tasks.TaskFilters
 import ptpger.domain.args.tasks.TaskInput
 import ptpger.domain.args.tasks.TaskUpdateInput
 import ptpger.domain.enums.Action
-import ptpger.domain.enums.Assignment
-import ptpger.domain.enums.Assignment.Assigned
-import ptpger.domain.enums.Assignment.Unassigned
 import ptpger.domain.enums.TaskStatus
 import ptpger.effects.Calendar
 import ptpger.effects.GenUUID
-import ptpger.exception.AError
 import ptpger.repos.ActionHistoriesRepository
 import ptpger.repos.TaskCommentsRepository
 import ptpger.repos.TasksRepository
@@ -40,8 +36,8 @@ trait TaskAlgebra[F[_]] {
     ): F[Unit]
 
   def assign(
-      id: TaskId,
-      userId: PersonId,
+      taskId: TaskId,
+      userIds: NonEmptyList[PersonId],
       author: NonEmptyString,
     ): F[Unit]
 
@@ -68,7 +64,6 @@ object TaskAlgebra {
             title = taskInput.title,
             assetId = taskInput.assetId,
             dueDate = taskInput.dueDate,
-            userId = None,
             status = TaskStatus.New,
             description = taskInput.description,
           )
@@ -88,12 +83,6 @@ object TaskAlgebra {
         ): F[Unit] =
         tasksRepository.update(id) { task =>
           for {
-            _ <- taskAssignment(task.id, userId, Assigned, "Unknown").whenA( // TODO Use real user
-              task.userId.isEmpty && taskInput.userId.nonEmpty
-            )
-            _ <- taskAssignment(task.id, userId, Unassigned, "Unknown").whenA( // TODO Use real user
-              task.userId.nonEmpty && taskInput.userId.isEmpty
-            )
             _ <- changeStatus(task.id, userId, taskInput.status).whenA(
               task.status != taskInput.status
             )
@@ -101,26 +90,24 @@ object TaskAlgebra {
             title = taskInput.title,
             assetId = taskInput.assetId,
             dueDate = taskInput.dueDate,
-            userId = taskInput.userId,
             status = taskInput.status,
             description = taskInput.description,
           )
         }
 
       override def assign(
-          id: TaskId,
-          userId: PersonId,
+          taskId: TaskId,
+          userIds: NonEmptyList[PersonId],
           author: NonEmptyString,
-        ): F[Unit] =
-        tasksRepository.update(id) { task =>
-          for {
-            _ <- taskAssignment(task.id, userId, Assigned, author).whenA(
-              task.userId.isEmpty
-            )
-          } yield task.copy(
-            userId = userId.some
-          )
+        ): F[Unit] = {
+        val usersTask = userIds.map { userId =>
+          UserTask(taskId, userId)
         }
+        for {
+          _ <- tasksRepository.assign(usersTask)
+          _ <- taskAssignment(taskId, userIds, author)
+        } yield {}
+      }
 
       override def addComment(userId: PersonId, commentInput: CommentInput): F[Unit] =
         for {
@@ -142,25 +129,30 @@ object TaskAlgebra {
 
       private def taskAssignment(
           taskId: TaskId,
-          assignerId: PersonId,
-          assignment: Assignment,
-          author: NonEmptyString, // executorId: Option[PersonId], TODO executorId didn't come, it should be get from authContext
+          executorIds: NonEmptyList[PersonId],
+          author: NonEmptyString,
         ): F[Unit] =
         for {
           now <- Calendar[F].currentZonedDateTime
-          user <- OptionT(usersRepository.findById(assignerId))
-            .getOrRaise(AError.Internal("User by id not found"))
-          action = ActionHistory(
-            taskId = taskId,
-            createdAt = now,
-            userId = assignerId,
-            action = Action.Assignment,
-            description = author, // assignment.description(user.firstname, user.lastname),
-          )
-          smsText =
-            s"\nСизга топшириқ берилди"
-          _ <- messages.sendSms(user.phone, smsText)
-          _ <- actionHistoriesRepository.create(action)
+          users <- usersRepository.findByIds(executorIds)
+          _ <- users.toList.traverse {
+            case executorId -> user =>
+              for {
+                _ <- Applicative[F].unit
+                action = ActionHistory(
+                  taskId = taskId,
+                  createdAt = now,
+                  userId = executorId,
+                  action = Action.Assignment,
+                  description = author, // assignment.description(user.firstname, user.lastname),
+                )
+                smsText =
+                  s"\nСизга топшириқ берилди"
+                _ <- messages.sendSms(user.phone, smsText)
+                _ <- actionHistoriesRepository.create(action)
+              } yield {}
+          }
+
         } yield {}
 
       private def changeStatus(
