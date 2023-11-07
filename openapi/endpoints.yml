@@ -394,7 +394,6 @@ components:
         - taskId
         - createdAt
         - title
-        - filename
         - dueDate
         - status
         - description
@@ -406,8 +405,6 @@ components:
           type: string
           format: date-time
         title:
-          type: string
-        filename:
           type: string
         dueDate:
           type: string
@@ -431,16 +428,12 @@ components:
       type: object
       required:
         - title
-        - assetId
         - dueDate
         - status
         - description
       properties:
         title:
           type: string
-        assetId:
-          type: string
-          format: uuid
         dueDate:
           type: string
           format: date
@@ -463,15 +456,11 @@ components:
       type: object
       required:
         - title
-        - assetId
         - dueDate
         - description
       properties:
         title:
           type: string
-        assetId:
-          type: string
-          format: uuid
         dueDate:
           type: string
           format: date

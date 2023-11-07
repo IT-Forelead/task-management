@@ -17,5 +17,5 @@ case class Task(
     userId: Option[PersonId],
     status: TaskStatus,
     description: NonEmptyString,
-    assetId: AssetId,
+    assetId: Option[AssetId],
   )

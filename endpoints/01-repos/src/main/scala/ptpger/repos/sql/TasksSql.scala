@@ -10,7 +10,7 @@ import ptpger.domain.TaskId
 import ptpger.domain.args.tasks.TaskFilters
 private[repos] object TasksSql extends Sql[TaskId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: date *: UsersSql.id.opt *: status *: nes *: AssetsSql.id)
+    (id *: zonedDateTime *: nes *: date *: UsersSql.id.opt *: status *: nes *: AssetsSql.id.opt)
       .to[Task]
 
   val insert: Command[Task] =
@@ -49,7 +49,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
   val update: Command[Task] =
     sql"""UPDATE tasks 
          SET title = $nes,
-         asset_id = ${AssetsSql.id},
+         asset_id = ${AssetsSql.id.opt},
          due_date = $date,
          user_id = ${UsersSql.id.opt},
          status = $status,

@@ -1,0 +1,1 @@
+ALTER TABLE tasks ALTER COLUMN asset_id DROP NOT NULL;
