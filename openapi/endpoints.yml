@@ -406,6 +406,8 @@ components:
           format: date-time
         title:
           type: string
+        assetId:
+          type: string
         dueDate:
           type: string
           format: date
@@ -434,6 +436,9 @@ components:
       properties:
         title:
           type: string
+        assetId:
+          type: string
+          format: uuid
         dueDate:
           type: string
           format: date
@@ -461,6 +466,9 @@ components:
       properties:
         title:
           type: string
+        assetId:
+          type: string
+          format: uuid
         dueDate:
           type: string
           format: date
