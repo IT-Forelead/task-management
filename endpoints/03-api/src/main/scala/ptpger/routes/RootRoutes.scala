@@ -22,6 +22,17 @@ final case class RootRoutes[
   ](
     assets: AssetsAlgebra[F]
   ) extends Routes[F, AuthedUser] {
+  private val AllowedMediaTypes: List[MediaType] = List(
+    MediaType.unsafeParse("application/pdf"),
+    MediaType.unsafeParse(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ),
+    MediaType.unsafeParse("image/png"),
+    MediaType.unsafeParse("image/jpeg"),
+    MediaType.unsafeParse("application/msword"),
+    MediaType.unsafeParse("application/wps-office.doc"),
+    MediaType.unsafeParse("application/wps-office.docx"),
+  )
   override val path = "/"
 
   override val public: HttpRoutes[F] = HttpRoutes.empty[F]
@@ -31,7 +42,9 @@ final case class RootRoutes[
       ar.req.decode[Multipart[F]] { multipart =>
         for {
           assetInfo <- multipart.parts.convert[AssetInput]
-          result <- OptionT(assets.uploadFile(multipart.parts.fileParts, assetInfo.public))
+          result <- OptionT(
+            assets.uploadFile(multipart.parts.fileParts(AllowedMediaTypes: _*), assetInfo.public)
+          )
             .foldF(BadRequest("File part not exists!")) { fileKey =>
               assets.create(assetInfo, fileKey).flatMap(Created(_))
             }
