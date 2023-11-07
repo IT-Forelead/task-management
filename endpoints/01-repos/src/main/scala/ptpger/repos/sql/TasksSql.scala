@@ -3,7 +3,7 @@ package ptpger.repos.sql
 import skunk._
 import skunk.codec.all.date
 import skunk.implicits._
-import skunk.codec.all.int4
+import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Task
@@ -16,7 +16,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
       .to[Task]
 
   private[repos] val countsCodec =
-    (int4 *: int4 *: int4 *: int4 *: int4 *: int4 *: int4)
+    (int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8)
       .to[Counts]
 
   val insert: Command[Task] =
@@ -54,10 +54,10 @@ private[repos] object TasksSql extends Sql[TaskId] {
          COUNT(1) as count,
          COUNT(1) filter (WHERE status = 'new') as "new",
          COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
-         COUNT(1) filter (WHERE status = 'completed') as completed,
+         COUNT(1) filter (WHERE status = 'complete') as completed,
          COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
          COUNT(1) filter (WHERE status = 'rejected') as rejected,
-         COUNT(1) filter (WHERE status = 'approved') as approved,
+         COUNT(1) filter (WHERE status = 'approved') as approved
          FROM tasks
        """.query(countsCodec)
 

@@ -4,11 +4,11 @@ import io.circe.generic.JsonCodec
 
 @JsonCodec
 case class Counts (
-    count: Int,
-    `new`: Int,
-    inProgress: Int,
-    completed: Int,
-    onHold: Int,
-    rejected: Int,
-    approved: Int,
+    count: Long,
+    `new`: Long,
+    inProgress: Long,
+    completed: Long,
+    onHold: Long,
+    rejected: Long,
+    approved: Long,
 )
