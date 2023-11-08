@@ -15,7 +15,7 @@ import ptpger.domain.enums.Action
 import ptpger.domain.enums.Role
 import ptpger.domain.enums.TaskStatus
 import ptpger.effects.IsUUID
-import ptpger.integrations.opersms.domain.DeliveryStatus
+import ptpger.domain.enums.DeliveryStatus
 
 package object sql {
   def identification[A: IsUUID]: Codec[A] = uuid.imap[A](IsUUID[A].uuid.get)(IsUUID[A].uuid.apply)

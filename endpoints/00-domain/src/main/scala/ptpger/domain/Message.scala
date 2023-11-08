@@ -7,7 +7,7 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import ptpger.Phone
-import ptpger.integrations.opersms.domain.DeliveryStatus
+import ptpger.domain.enums.DeliveryStatus
 
 @JsonCodec
 case class Message(

@@ -7,7 +7,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 
 import ptpger.domain.Message
 import ptpger.domain.MessageId
-import ptpger.integrations.opersms.domain.DeliveryStatus
+import ptpger.domain.enums.DeliveryStatus
 import ptpger.repos.sql.MessagesSql
 trait MessagesRepository[F[_]] {
   def create(message: Message): F[Unit]

@@ -8,10 +8,10 @@ import eu.timepit.refined.types.string.NonEmptyString
 import ptpger.Phone
 import ptpger.domain.Message
 import ptpger.domain.MessageId
+import ptpger.domain.enums.DeliveryStatus
 import ptpger.effects.Calendar
 import ptpger.effects.GenUUID
 import ptpger.integrations.opersms.OperSmsClient
-import ptpger.integrations.opersms.domain.DeliveryStatus
 import ptpger.repos.MessagesRepository
 import ptpger.utils.ID
 
@@ -36,7 +36,11 @@ object MessagesAlgebra {
             status = DeliveryStatus.Sent,
           )
           _ <- messagesRepository.create(message)
-          _ <- operSmsClient.send(phone, text, messagesRepository.update(id))
+          _ <- operSmsClient.send(
+            phone,
+            text,
+            deliveryStatus => messagesRepository.update(id)(DeliveryStatus.fromApi(deliveryStatus)),
+          )
         } yield id
     }
 }

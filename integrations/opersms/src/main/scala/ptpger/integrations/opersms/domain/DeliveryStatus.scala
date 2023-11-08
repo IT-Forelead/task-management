@@ -2,10 +2,9 @@ package ptpger.integrations.opersms.domain
 
 import scala.collection.immutable
 
-import enumeratum.EnumEntry.Snakecase
 import enumeratum._
 
-sealed trait DeliveryStatus extends Snakecase
+sealed trait DeliveryStatus extends EnumEntry
 
 object DeliveryStatus extends CirceEnum[DeliveryStatus] with Enum[DeliveryStatus] {
   case object Sent extends DeliveryStatus
