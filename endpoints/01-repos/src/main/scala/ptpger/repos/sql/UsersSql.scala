@@ -29,7 +29,7 @@ private[repos] object UsersSql extends Sql[PersonId] {
 
   def findByIds(ids: List[PersonId]): Query[ids.type, User] =
     sql"""SELECT id, created_at, firstname, lastname, role, phone FROM users
-          WHERE id IN ${id.values.list(ids)}""".query(codec)
+          WHERE id IN (${id.values.list(ids)})""".query(codec)
 
   val insert: Command[AccessCredentials[User]] =
     sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, $role, $passwordHash)"""
