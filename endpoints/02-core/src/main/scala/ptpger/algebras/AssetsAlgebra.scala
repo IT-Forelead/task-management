@@ -1,19 +1,14 @@
 package ptpger.algebras
 
 import java.net.URL
-
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
-import cats.implicits.catsSyntaxApplicativeErrorId
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
-import cats.implicits.toTraverseOps
+import cats.implicits.{catsSyntaxApplicativeErrorId, catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps, toTraverseOps}
 import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.multipart.Part
 import uz.scala.aws.s3.S3Client
 import uz.scala.syntax.refined.commonSyntaxAutoRefineOptV
-
 import ptpger.domain.Asset
 import ptpger.domain.Asset.AssetInfo
 import ptpger.domain.Asset.AssetInput
@@ -32,6 +27,7 @@ trait AssetsAlgebra[F[_]] {
     ): F[Option[NonEmptyString]]
   def getPublicUrl(assetIds: NonEmptyList[AssetId]): F[Map[AssetId, URL]]
   def getPublicUrl(assetId: AssetId): F[AssetInfo]
+  def downloadObject(assetId: AssetId): F[fs2.Stream[F, Byte]]
 }
 object AssetsAlgebra {
   def make[F[_]: MonadThrow: GenUUID: Calendar: Lambda[M[_] => fs2.Compiler[M, M]]](
@@ -83,6 +79,13 @@ object AssetsAlgebra {
           s3Client.objectUrl(asset.s3Key.value).map { url =>
             AssetInfo(asset.public, asset.fileName, url)
           }
+        }
+
+      override def downloadObject(assetId: AssetId): F[fs2.Stream[F, Byte]] =
+        OptionT(assetsRepository.findAsset(assetId)).foldF(
+          AError.Internal(s"File not found by assetId [$assetId]").raiseError[F, fs2.Stream[F, Byte]]
+        ) { asset =>
+          s3Client.downloadObject(asset.s3Key.value).pure[F]
         }
 
       private def getFileType(filename: String): String = filename.dropWhile(_ == '.').tail

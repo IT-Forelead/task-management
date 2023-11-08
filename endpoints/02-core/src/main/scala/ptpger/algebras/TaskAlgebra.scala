@@ -8,6 +8,7 @@ import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
 import eu.timepit.refined.types.string.NonEmptyString
+import ptpger.AppDomain
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 import ptpger.domain._
 import ptpger.domain.args.tasks.CommentInput
@@ -149,8 +150,13 @@ object TaskAlgebra {
                   action = Action.Assignment,
                   description = author, // assignment.description(user.firstname, user.lastname),
                 )
-//                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $id\n").getOrElse("") TODO need link to get file
-                smsText = s"Сизга топшириқ берилди:\nТопшириқ номи: ${taskDetails.title}\nМуддат тугашига қолган вақт: $days кун"
+                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $AppDomain/assets/view/$id\n").getOrElse("")
+                smsText = s"""
+                             |Сизга топшириқ берилди:
+                             |Топшириқ номи: ${taskDetails.title}
+                             |Муддат тугашига қолган вақт: $days кун
+                             |$linkToFile
+                """.stripMargin.trim
 
                 _ <- messages.sendSms(user.phone, smsText)
                 _ <- actionHistoriesRepository.create(action)

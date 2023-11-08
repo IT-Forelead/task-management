@@ -1,19 +1,18 @@
 package ptpger.routes
 
 import cats.MonadThrow
-import cats.data.OptionT
+import cats.data.{NonEmptyList, OptionT}
 import cats.effect.kernel.Concurrent
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
+import cats.implicits.{catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps}
 import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.circe.JsonDecoder
+import org.http4s.headers.{`Content-Type`, `Transfer-Encoding`}
 import org.http4s.multipart.Multipart
 import uz.scala.http4s.syntax.all.http4SyntaxPartOps
 import uz.scala.http4s.utils.Routes
-
 import ptpger.algebras.AssetsAlgebra
 import ptpger.domain.Asset.AssetInput
 import ptpger.domain._
@@ -35,7 +34,18 @@ final case class RootRoutes[
   )
   override val path = "/"
 
-  override val public: HttpRoutes[F] = HttpRoutes.empty[F]
+  override val public: HttpRoutes[F] = HttpRoutes.of[F] {
+    case GET -> Root / "assets" / "view" / UUIDVar(id) =>
+      for {
+        obj <- assets.downloadObject(id.coerce[AssetId])
+      } yield Response(
+        body = obj,
+        headers = Headers(
+          `Content-Type`(MediaType.application.`octet-stream`),
+          `Transfer-Encoding`(TransferCoding.chunked.pure[NonEmptyList]),
+        ),
+      )
+  }
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "assets" as _ =>
