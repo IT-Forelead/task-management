@@ -1,4 +1,4 @@
-package ptpger.domain
+package ptpger.persistence
 
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -7,7 +7,10 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
+import ptpger.domain.AssetId
+import ptpger.domain.TaskId
 import ptpger.domain.enums.TaskStatus
+
 @JsonCodec
 case class Task(
     id: TaskId,
@@ -17,5 +20,4 @@ case class Task(
     status: TaskStatus,
     description: NonEmptyString,
     assetId: Option[AssetId],
-    assignedUsers: Option[String] = None, // TODO need to return List[Person.fullname]
   )

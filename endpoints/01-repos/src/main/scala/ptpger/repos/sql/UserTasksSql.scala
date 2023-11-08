@@ -13,4 +13,8 @@ private[repos] object UserTasksSql extends Sql[TaskId] {
 
   val select: Query[TaskId, UserTask] =
     sql"""SELECT * FROM user_tasks WHERE task_id = $id""".query(codec)
+
+  def findByIds(taskIds: List[TaskId]): Query[taskIds.type, UserTask] =
+    sql"""SELECT * FROM user_tasks
+          WHERE task_id IN (${id.values.list(taskIds)})""".query(codec)
 }

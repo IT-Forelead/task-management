@@ -2,24 +2,34 @@ package ptpger.algebras
 
 import cats.Applicative
 import cats.MonadThrow
-import cats.data.{NonEmptyList, OptionT}
+import cats.data.NonEmptyList
+import cats.data.OptionT
+import cats.implicits._
 import cats.implicits.catsSyntaxApplicativeByName
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
 import eu.timepit.refined.types.string.NonEmptyString
-import ptpger.AppDomain
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-import ptpger.domain._
+
+import ptpger.AppDomain
+import ptpger.domain.ActionHistory
+import ptpger.domain.Comment
+import ptpger.domain.Counts
+import ptpger.domain.PersonId
+import ptpger.domain.TaskId
+import ptpger.domain.UserTask
 import ptpger.domain.args.tasks.CommentInput
 import ptpger.domain.args.tasks.TaskFilters
 import ptpger.domain.args.tasks.TaskInput
 import ptpger.domain.args.tasks.TaskUpdateInput
 import ptpger.domain.enums.Action
 import ptpger.domain.enums.TaskStatus
+import ptpger.domain.{ Task => DTask }
 import ptpger.effects.Calendar
 import ptpger.effects.GenUUID
 import ptpger.exception.AError
+import ptpger.persistence.Task
 import ptpger.repos.ActionHistoriesRepository
 import ptpger.repos.TaskCommentsRepository
 import ptpger.repos.TasksRepository
@@ -28,7 +38,7 @@ import ptpger.utils.ID
 
 trait TaskAlgebra[F[_]] {
   def create(taskInput: TaskInput): F[TaskId]
-  def get(filters: TaskFilters): F[List[Task]]
+  def get(filters: TaskFilters): F[List[DTask]]
   def getCounts: F[Counts]
   def update(
       id: TaskId,
@@ -71,8 +81,27 @@ object TaskAlgebra {
           _ <- tasksRepository.create(task)
         } yield id
 
-      override def get(filters: TaskFilters): F[List[Task]] =
-        tasksRepository.get(filters)
+      override def get(filters: TaskFilters): F[List[DTask]] =
+        for {
+          tasks <- tasksRepository.get(filters)
+          userTasks <- tasksRepository.getUserTasks(tasks.map(_.id))
+          users <- usersRepository.findByIds(
+            NonEmptyList.fromListUnsafe(userTasks.values.toList.map(_.userId))
+          ) // TODO write in correct way
+        } yield tasks.map { task =>
+          val assignedUser =
+            userTasks.get(task.id).flatMap(ut => users.get(ut.userId)).map(_.firstname.value)
+          DTask(
+            id = task.id,
+            createdAt = task.createdAt,
+            title = task.title,
+            dueDate = task.dueDate,
+            status = task.status,
+            description = task.description,
+            assetId = task.assetId,
+            assignedUsers = assignedUser,
+          )
+        }
 
       override def getCounts: F[Counts] =
         tasksRepository.getCounts
@@ -150,7 +179,10 @@ object TaskAlgebra {
                   action = Action.Assignment,
                   description = author, // assignment.description(user.firstname, user.lastname),
                 )
-                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $AppDomain/api/v1/assets/view/$id\n").getOrElse("")
+                linkToFile = taskDetails
+                  .assetId
+                  .map(id => s"Файлга ҳавола: $AppDomain/api/v1/assets/view/$id\n")
+                  .getOrElse("")
                 smsText = s"""
                              |Сизга топшириқ берилди:
                              |Топшириқ номи: ${taskDetails.title}
