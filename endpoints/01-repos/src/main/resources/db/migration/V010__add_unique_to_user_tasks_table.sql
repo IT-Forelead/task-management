@@ -1,0 +1,1 @@
+ALTER TABLE user_tasks ADD CONSTRAINT user_tasks_unique UNIQUE (task_id, user_id);

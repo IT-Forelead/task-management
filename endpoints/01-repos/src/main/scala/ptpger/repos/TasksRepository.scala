@@ -1,17 +1,20 @@
 package ptpger.repos
 
-import cats.data.{NonEmptyList, OptionT}
+import cats.data.NonEmptyList
+import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxMonadError
 import cats.implicits.toFlatMapOps
 import skunk._
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
+
+import ptpger.domain.Counts
 import ptpger.domain.Task
 import ptpger.domain.TaskId
 import ptpger.domain.UserTask
-import ptpger.domain.Counts
 import ptpger.domain.args.tasks.TaskFilters
 import ptpger.exception.AError
 import ptpger.repos.sql.TasksSql
@@ -50,7 +53,10 @@ object TasksRepository {
       )
     override def assign(userTasks: NonEmptyList[UserTask]): F[Unit] = {
       val tasks = userTasks.toList
-      UserTasksSql.insertBatch(tasks).execute(tasks)
+      UserTasksSql.insertBatch(tasks).execute(tasks).adaptError {
+        case SqlState.UniqueViolation(_) =>
+          AError.Internal("Task already assigned")
+      }
     }
   }
 }
