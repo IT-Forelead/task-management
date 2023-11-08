@@ -88,7 +88,10 @@ object AssetsAlgebra {
           s3Client.downloadObject(asset.s3Key.value).pure[F]
         }
 
-      private def getFileType(filename: String): String = filename.dropWhile(_ == '.').tail
+      private def getFileType(filename: String): String = {
+        val extension = filename.substring(filename.lastIndexOf('.') + 1)
+        extension.toLowerCase
+      }
 
       private def genFileKey(orgFilename: String): F[String] =
         GenUUID[F].make.map { uuid =>
