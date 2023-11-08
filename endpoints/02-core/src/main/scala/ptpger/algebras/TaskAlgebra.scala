@@ -150,7 +150,7 @@ object TaskAlgebra {
                   action = Action.Assignment,
                   description = author, // assignment.description(user.firstname, user.lastname),
                 )
-                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $AppDomain/assets/view/$id\n").getOrElse("")
+                linkToFile = taskDetails.assetId.map(id => s"Файлга ҳавола: $AppDomain/api/v1/assets/view/$id\n").getOrElse("")
                 smsText = s"""
                              |Сизга топшириқ берилди:
                              |Топшириқ номи: ${taskDetails.title}
