@@ -1,8 +1,7 @@
 package uz.scala.aws.s3
 
 import java.net.URL
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.Date
 
 import scala.jdk.CollectionConverters._
@@ -83,7 +82,7 @@ object S3Client {
     }
 
     private def expireTime(): Date =
-      Date.from(LocalDateTime.now().plusMinutes(60).atZone(ZoneId.systemDefault).toInstant)
+      Date.from(ZonedDateTime.now().plusDays(1).toInstant)
 
     /** Uploads a file in a single request. Suitable for small files.
       *
