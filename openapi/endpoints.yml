@@ -703,6 +703,8 @@ components:
           enum:
             - creator
             - admin
+            - executor
+            - controller
         phone:
           type: string
       xml:
