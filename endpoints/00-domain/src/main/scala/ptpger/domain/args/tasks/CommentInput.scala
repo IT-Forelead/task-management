@@ -9,4 +9,5 @@ import io.circe.refined._
 case class CommentInput(
     taskId: TaskId,
     note: NonEmptyString,
+    assetId: Option[AssetId],
   )

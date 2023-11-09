@@ -150,6 +150,7 @@ object TaskAlgebra {
             createdAt = now,
             note = commentInput.note,
             userId = userId,
+            assetId = commentInput.assetId,
           )
           _ <- taskCommentsRepository.create(comment)
         } yield {}

@@ -406,8 +406,6 @@ components:
         password:
           type: string
           example: "Secret1!"
-      xml:
-        name: Login
     AuthTokens:
       type: object
       properties:
@@ -415,8 +413,6 @@ components:
           type: string
         refreshToken:
           type: string
-      xml:
-        name: AuthTokens
     TaskFilters:
       type: object
       properties:
@@ -431,6 +427,9 @@ components:
             - in_progress
             - complete
             - on_hold
+            - rejected
+            - approved
+            - expired
         dueDate:
           type: string
           format: date
@@ -439,8 +438,6 @@ components:
           format: date-time
         assigned:
           type: boolean
-      xml:
-        name: TaskFilters
     Task:
       type: object
       required:
@@ -475,6 +472,9 @@ components:
             - in_progress
             - complete
             - on_hold
+            - rejected
+            - approved
+            - expired
         description:
           type: string
         executors:
@@ -485,8 +485,6 @@ components:
           type: array
           items:
             type: string
-      xml:
-        name: Task
     TaskUpdateInput:
       type: object
       required:
@@ -511,10 +509,11 @@ components:
             - in_progress
             - complete
             - on_hold
+            - rejected
+            - approved
+            - expired
         description:
           type: string
-      xml:
-        name: TaskUpdateInput
     TaskInput:
       type: object
       required:
@@ -532,8 +531,6 @@ components:
           format: date
         description:
           type: string
-      xml:
-        name: TaskInput
     Counts:
       type: object
       required:
@@ -570,8 +567,6 @@ components:
         expired:
           type: integer
           format: int32
-      xml:
-        name: Counts
     CommentInput:
       type: object
       required:
@@ -583,8 +578,9 @@ components:
           format: uuid
         note:
           type: string
-      xml:
-        name: CommentInput
+        assetId:
+          type: string
+          format: uuid
     Comment:
       type: object
       required:
@@ -604,8 +600,9 @@ components:
         userId:
           type: string
           format: uuid
-      xml:
-        name: Comment
+        assetId:
+          type: string
+          format: uuid
     ActionHistory:
       type: object
       required:
@@ -633,8 +630,6 @@ components:
         userId:
           type: string
           format: uuid
-      xml:
-        name: ActionHistory
     Asset:
       type: object
       required:
@@ -655,8 +650,6 @@ components:
           type: boolean
         fileName:
           type: string
-      xml:
-        name: Asset
     AssetInput:
       type: object
       required:
@@ -670,8 +663,6 @@ components:
         file:
           type: string
           format: binary
-      xml:
-        name: AssetInput
     AssetInfo:
       type: object
       required:
@@ -685,8 +676,6 @@ components:
         url:
           type: string
           format: url
-      xml:
-        name: AssetInfo
     User:
       type: object
       required:
@@ -717,8 +706,6 @@ components:
             - controller
         phone:
           type: string
-      xml:
-        name: User
     UserFilters:
       type: object
       properties:
@@ -731,8 +718,6 @@ components:
           enum:
             - employed
             - unemployed
-      xml:
-        name: UserFilters
     UserInput:
       type: object
       required:
@@ -746,8 +731,6 @@ components:
           type: string
         lastname:
           type: string
-      xml:
-        name: UserInput
     TaskAssignInput:
       type: object
       required:
@@ -758,5 +741,3 @@ components:
           items:
             type: string
             format: uuid
-      xml:
-        name: TaskAssignInput

@@ -7,7 +7,7 @@ import ptpger.domain.Comment
 import ptpger.domain.TaskId
 private[repos] object TaskCommentsSql extends Sql[TaskId] {
   private val codec =
-    (id *: zonedDateTime *: nes *: UsersSql.id).to[Comment]
+    (id *: zonedDateTime *: nes *: UsersSql.id *: AssetsSql.id.opt).to[Comment]
 
   val insert: Command[Comment] =
     sql"""INSERT INTO task_comments VALUES ($codec)""".command

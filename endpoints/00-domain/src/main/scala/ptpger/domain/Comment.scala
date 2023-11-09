@@ -12,4 +12,5 @@ case class Comment(
     createdAt: ZonedDateTime,
     note: NonEmptyString,
     userId: PersonId,
+    assetId: Option[AssetId],
   )
