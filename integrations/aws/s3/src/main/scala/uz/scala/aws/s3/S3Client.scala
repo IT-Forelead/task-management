@@ -14,7 +14,6 @@ import cats.implicits.catsSyntaxFlatMapOps
 import com.amazonaws.HttpMethod
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model._
@@ -42,17 +41,16 @@ trait S3Client[F[_]] {
 }
 
 object S3Client {
-  private[this] def makeAmazonS3(awsConfig: AWSConfig): AmazonS3 = {
-    val credentials = new BasicAWSCredentials(awsConfig.accessKey.value, awsConfig.secretKey.value)
-    val credentialsProvider = new AWSStaticCredentialsProvider(credentials)
+  private[this] def makeAmazonS3(awsConfig: AWSConfig): AmazonS3 =
     AmazonS3ClientBuilder
       .standard()
-      .withEndpointConfiguration(
-        new EndpointConfiguration(awsConfig.serviceEndpoint, awsConfig.signingRegion)
+      .withRegion(awsConfig.signingRegion)
+      .withCredentials(
+        new AWSStaticCredentialsProvider(
+          new BasicAWSCredentials(awsConfig.accessKey.value, awsConfig.secretKey.value)
+        )
       )
-      .withCredentials(credentialsProvider)
       .build()
-  }
 
   def resource[F[_]: Async](awsConfig: AWSConfig): Resource[F, S3Client[F]] =
     for {
