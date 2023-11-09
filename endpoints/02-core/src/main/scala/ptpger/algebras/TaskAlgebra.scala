@@ -24,6 +24,7 @@ import ptpger.domain.args.tasks.TaskFilters
 import ptpger.domain.args.tasks.TaskInput
 import ptpger.domain.args.tasks.TaskUpdateInput
 import ptpger.domain.enums.Action
+import ptpger.domain.enums.Role
 import ptpger.domain.enums.TaskStatus
 import ptpger.domain.{ Task => DTask }
 import ptpger.effects.Calendar
@@ -82,15 +83,16 @@ object TaskAlgebra {
         } yield id
 
       override def get(filters: TaskFilters): F[List[DTask]] =
-        for {
-          tasks <- tasksRepository.get(filters)
-          userTasks <- tasksRepository.getUserTasks(tasks.map(_.id))
-          users <- usersRepository.findByIds(
-            NonEmptyList.fromListUnsafe(userTasks.values.toList.map(_.userId))
-          ) // TODO write in correct way
-        } yield tasks.map { task =>
-          val assignedUser =
-            userTasks.get(task.id).flatMap(ut => users.get(ut.userId)).map(_.firstname.value)
+        (for {
+          tasks <- OptionT(tasksRepository.get(filters).map(NonEmptyList.fromList))
+          userTasks <- OptionT.liftF(tasksRepository.getUserTasks(tasks.map(_.id)))
+          maybeUserIds = NonEmptyList.fromList(
+            userTasks.values.toList.flatten.map(_.userId).distinct
+          )
+          users <- OptionT.liftF(maybeUserIds.traverse(usersRepository.findByIds))
+        } yield tasks.toList.map { task =>
+          val taskUsers =
+            userTasks.getOrElse(task.id, Nil).flatMap(ut => users.flatMap(_.get(ut.userId)))
           DTask(
             id = task.id,
             createdAt = task.createdAt,
@@ -99,9 +101,10 @@ object TaskAlgebra {
             status = task.status,
             description = task.description,
             assetId = task.assetId,
-            assignedUsers = assignedUser,
+            executors = taskUsers.filter(_.role == Role.Executor).map(_.fullName),
+            controllers = taskUsers.filter(_.role == Role.Controller).map(_.fullName),
           )
-        }
+        }).getOrElse(Nil)
 
       override def getCounts: F[Counts] =
         tasksRepository.getCounts

@@ -450,6 +450,8 @@ components:
         - dueDate
         - status
         - description
+        - executors
+        - controllers
       properties:
         taskId:
           type: string
@@ -475,6 +477,14 @@ components:
             - on_hold
         description:
           type: string
+        executors:
+          type: array
+          items:
+            type: string
+        controllers:
+          type: array
+          items:
+            type: string
       xml:
         name: Task
     TaskUpdateInput:

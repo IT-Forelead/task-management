@@ -17,5 +17,6 @@ case class Task(
     status: TaskStatus,
     description: NonEmptyString,
     assetId: Option[AssetId],
-    assignedUsers: Option[String] = None, // TODO need to return List[Person.fullname]
+    executors: List[NonEmptyString],
+    controllers: List[NonEmptyString],
   )
