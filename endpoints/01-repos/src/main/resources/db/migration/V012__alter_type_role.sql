@@ -1,0 +1,2 @@
+ALTER TYPE ROLE ADD VALUE 'executor';
+ALTER TYPE ROLE ADD VALUE 'controller';

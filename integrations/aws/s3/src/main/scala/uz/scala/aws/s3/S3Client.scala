@@ -14,7 +14,6 @@ import cats.implicits.catsSyntaxFlatMapOps
 import com.amazonaws.HttpMethod
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model._
@@ -42,17 +41,16 @@ trait S3Client[F[_]] {
 }
 
 object S3Client {
-  private[this] def makeAmazonS3(awsConfig: AWSConfig): AmazonS3 = {
-    val credentials = new BasicAWSCredentials(awsConfig.accessKey.value, awsConfig.secretKey.value)
-    val credentialsProvider = new AWSStaticCredentialsProvider(credentials)
+  private[this] def makeAmazonS3(awsConfig: AWSConfig): AmazonS3 =
     AmazonS3ClientBuilder
       .standard()
-      .withEndpointConfiguration(
-        new EndpointConfiguration(awsConfig.serviceEndpoint, awsConfig.signingRegion)
+      .withRegion(awsConfig.signingRegion)
+      .withCredentials(
+        new AWSStaticCredentialsProvider(
+          new BasicAWSCredentials(awsConfig.accessKey.value, awsConfig.secretKey.value)
+        )
       )
-      .withCredentials(credentialsProvider)
       .build()
-  }
 
   def resource[F[_]: Async](awsConfig: AWSConfig): Resource[F, S3Client[F]] =
     for {
@@ -105,11 +103,11 @@ object S3Client {
                 makeMetadata(byteSource.size()),
               )
             uploadRequest.getRequestClientOptions.setReadLimit(1024 * 1024 * 5)
-            if (public) {
-              val acl = new AccessControlList()
-              acl.grantPermission(GroupGrantee.AllUsers, Permission.Read)
-              uploadRequest.withAccessControlList(acl)
-            }
+//            if (public) {
+//              val acl = new AccessControlList()
+//              acl.grantPermission(GroupGrantee.AllUsers, Permission.Read)
+//              uploadRequest.withAccessControlList(acl)
+//            }
             uploadRequest
           }
         } yield ()
@@ -230,13 +228,11 @@ object S3Client {
     override def listBuckets: Stream[F, Bucket] =
       Stream.fromIterator(transferManager.getAmazonS3Client.listBuckets().asScala.iterator, 1024)
 
-    override def objectUrl(key: String): F[URL] = {
-      val presignedUrlRequest =
-        new GeneratePresignedUrlRequest(awsConfig.bucketName, key)
-          .withMethod(HttpMethod.GET)
-          .withExpiration(expireTime())
-
-      F.delay(transferManager.getAmazonS3Client.generatePresignedUrl(presignedUrlRequest))
-    }
+    override def objectUrl(key: String): F[URL] =
+      F.delay(
+        transferManager
+          .getAmazonS3Client
+          .generatePresignedUrl(awsConfig.bucketName, key, expireTime(), HttpMethod.GET)
+      )
   }
 }

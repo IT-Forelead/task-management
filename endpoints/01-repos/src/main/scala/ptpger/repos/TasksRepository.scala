@@ -29,7 +29,7 @@ trait TasksRepository[F[_]] {
   def findById(taskId: TaskId): F[Option[Task]]
   def update(id: TaskId)(update: Task => F[Task]): F[Unit]
   def assign(userTasks: NonEmptyList[UserTask]): F[Unit]
-  def getUserTasks(taskId: List[TaskId]): F[Map[TaskId, UserTask]]
+  def getUserTasks(taskIds: NonEmptyList[TaskId]): F[Map[TaskId, List[UserTask]]]
 }
 
 object TasksRepository {
@@ -70,7 +70,12 @@ object TasksRepository {
           AError.Internal("Task already assigned")
       }
     }
-    override def getUserTasks(taskIds: List[TaskId]): F[Map[TaskId, UserTask]] =
-      UserTasksSql.findByIds(taskIds).queryList(taskIds).map(_.map(a => a.taskId -> a).toMap)
+    override def getUserTasks(taskIds: NonEmptyList[TaskId]): F[Map[TaskId, List[UserTask]]] = {
+      val taskIdsList = taskIds.toList
+      UserTasksSql
+        .findByIds(taskIdsList)
+        .queryList(taskIdsList)
+        .map(_.groupBy(_.taskId))
+    }
   }
 }
