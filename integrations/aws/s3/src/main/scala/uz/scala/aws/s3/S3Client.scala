@@ -103,11 +103,11 @@ object S3Client {
                 makeMetadata(byteSource.size()),
               )
             uploadRequest.getRequestClientOptions.setReadLimit(1024 * 1024 * 5)
-            if (public) {
-              val acl = new AccessControlList()
-              acl.grantPermission(GroupGrantee.AllUsers, Permission.Read)
-              uploadRequest.withAccessControlList(acl)
-            }
+//            if (public) {
+//              val acl = new AccessControlList()
+//              acl.grantPermission(GroupGrantee.AllUsers, Permission.Read)
+//              uploadRequest.withAccessControlList(acl)
+//            }
             uploadRequest
           }
         } yield ()
