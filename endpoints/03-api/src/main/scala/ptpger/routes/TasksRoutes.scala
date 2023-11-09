@@ -15,7 +15,6 @@ import uz.scala.http4s.utils.Routes
 import ptpger.algebras.TaskAlgebra
 import ptpger.domain._
 import ptpger.domain.args.tasks._
-import ptpger.domain.args.users.UserId
 final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
     tasks: TaskAlgebra[F]
   ) extends Routes[F, AuthedUser] {
@@ -34,10 +33,8 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
       }
     case GET -> Root / "counts" as _ =>
       tasks.getCounts.flatMap(Ok(_))
-    case ar @ POST -> Root / "counts" as _ =>
-      ar.req.decodeR[UserId] { user =>
-        tasks.getCountsById(user.id).flatMap(Ok(_))
-      }
+    case GET -> Root / "counts" / UUIDVar(id) as _ =>
+        tasks.getCountsByUserId(PersonId(id)).flatMap(Ok(_))
     case ar @ PUT -> Root / UUIDVar(id) as user =>
       ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
         tasks.assign(

@@ -75,11 +75,9 @@ private[repos] object TasksSql extends Sql[TaskId] {
           COUNT(1) filter (WHERE status = 'approved') as approved,
           COUNT(1) filter (WHERE status = 'expired') as expired
           FROM tasks
-          WHERE id IN (
-            SELECT task_id
-            FROM user_tasks
-            WHERE user_id  = ${UsersSql.id}
-          )
+          INNER JOIN user_tasks
+          ON tasks.id = user_tasks.task_id
+          WHERE user_id  = ${UsersSql.id}
       """.query(countsCodec)
 
   val findById: Query[TaskId, Task] =

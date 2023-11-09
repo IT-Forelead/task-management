@@ -25,7 +25,7 @@ trait TasksRepository[F[_]] {
   def create(task: Task): F[Unit]
   def get(filters: TaskFilters): F[List[Task]]
   def getCounts: F[Counts]
-  def getCountsById(userId: PersonId): F[Counts]
+  def getCountsByUserId(userId: PersonId): F[Counts]
   def findById(taskId: TaskId): F[Option[Task]]
   def update(id: TaskId)(update: Task => F[Task]): F[Unit]
   def assign(userTasks: NonEmptyList[UserTask]): F[Unit]
@@ -48,7 +48,7 @@ object TasksRepository {
     override def getCounts: F[Counts] =
       TasksSql.count.queryUnique(Void)
 
-    override def getCountsById(userId: PersonId): F[Counts] =
+    override def getCountsByUserId(userId: PersonId): F[Counts] =
       TasksSql.countByUser.queryUnique(userId)
 
     override def findById(taskId: TaskId): F[Option[Task]] =
