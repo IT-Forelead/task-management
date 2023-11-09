@@ -560,6 +560,7 @@ components:
         - onHold
         - rejected
         - approved
+        - expired
       properties:
         count:
           type: integer
@@ -580,6 +581,9 @@ components:
           type: integer
           format: int32
         approved:
+          type: integer
+          format: int32
+        expired:
           type: integer
           format: int32
       xml:

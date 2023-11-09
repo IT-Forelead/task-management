@@ -11,5 +11,6 @@ object TaskStatus extends Enum[TaskStatus] with CirceEnum[TaskStatus] {
   case object OnHold extends TaskStatus
   case object Rejected extends TaskStatus
   case object Approved extends TaskStatus
+  case object Expired extends TaskStatus
   override def values: IndexedSeq[TaskStatus] = findValues
 }

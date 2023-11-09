@@ -6,7 +6,7 @@ import skunk.implicits._
 
 import ptpger.domain.Message
 import ptpger.domain.MessageId
-import ptpger.integrations.opersms.domain.DeliveryStatus
+import ptpger.domain.enums.DeliveryStatus
 
 private[repos] object MessagesSql extends Sql[MessageId] {
   private val codec = (id *: zonedDateTime *: phone *: nes *: deliveryStatus).to[Message]

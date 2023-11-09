@@ -11,4 +11,5 @@ case class Counts (
     onHold: Long,
     rejected: Long,
     approved: Long,
+    expired: Long,
 )

@@ -1,0 +1,1 @@
+ALTER TYPE STATUS ADD VALUE 'expired';

@@ -7,17 +7,17 @@ import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Counts
-import ptpger.domain.Task
 import ptpger.domain.TaskId
 import ptpger.domain.PersonId
 import ptpger.domain.args.tasks.TaskFilters
+import ptpger.persistence.Task
 private[repos] object TasksSql extends Sql[TaskId] {
   private[repos] val codec =
     (id *: zonedDateTime *: nes *: date *: status *: nes *: AssetsSql.id.opt)
       .to[Task]
 
   private[repos] val countsCodec =
-    (int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8)
+    (int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8)
       .to[Counts]
 
   val insert: Command[Task] =
@@ -58,7 +58,8 @@ private[repos] object TasksSql extends Sql[TaskId] {
           COUNT(1) filter (WHERE status = 'complete') as completed,
           COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
           COUNT(1) filter (WHERE status = 'rejected') as rejected,
-          COUNT(1) filter (WHERE status = 'approved') as approved
+          COUNT(1) filter (WHERE status = 'approved') as approved,
+          COUNT(1) filter (WHERE status = 'expired') as expired
           FROM tasks
        """.query(countsCodec)
 
@@ -71,7 +72,8 @@ private[repos] object TasksSql extends Sql[TaskId] {
           COUNT(1) filter (WHERE status = 'complete') as completed,
           COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
           COUNT(1) filter (WHERE status = 'rejected') as rejected,
-          COUNT(1) filter (WHERE status = 'approved') as approved
+          COUNT(1) filter (WHERE status = 'approved') as approved,
+          COUNT(1) filter (WHERE status = 'expired') as expired
           FROM tasks
           WHERE id IN (
             SELECT task_id

@@ -40,10 +40,10 @@ object Asset {
             values
               .get("public")
               .fold("public isn't defined".invalidNec[Boolean])(_.toBoolean.validNec[String]),
-            values.get("age").traverse { filename =>
+            values.get("filename").traverse { filename =>
               Option
                 .unless(filename.isBlank)(filename: NonEmptyString)
-                .fold("age isn't defined".invalidNec[NonEmptyString])(_.validNec[String])
+                .fold("filename isn't defined".invalidNec[NonEmptyString])(_.validNec[String])
             },
           ).mapN(AssetInput.apply)
       }
