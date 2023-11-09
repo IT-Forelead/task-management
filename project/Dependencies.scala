@@ -28,8 +28,8 @@ object Dependencies {
     lazy val weaver = "0.8.1"
     lazy val `test-container` = "1.17.6"
     lazy val postgresql = "42.5.4"
-    lazy val awsSdk = "1.12.111"
-    lazy val awsSoftwareS3 = "2.20.68"
+    lazy val awsSdk = "1.12.583"
+    lazy val awsSoftwareS3 = "2.21.17"
     lazy val guava = "31.0.1-jre"
   }
   trait LibGroup {

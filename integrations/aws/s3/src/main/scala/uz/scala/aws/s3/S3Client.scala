@@ -230,13 +230,11 @@ object S3Client {
     override def listBuckets: Stream[F, Bucket] =
       Stream.fromIterator(transferManager.getAmazonS3Client.listBuckets().asScala.iterator, 1024)
 
-    override def objectUrl(key: String): F[URL] = {
-      val presignedUrlRequest =
-        new GeneratePresignedUrlRequest(awsConfig.bucketName, key)
-          .withMethod(HttpMethod.GET)
-          .withExpiration(expireTime())
-
-      F.delay(transferManager.getAmazonS3Client.generatePresignedUrl(presignedUrlRequest))
-    }
+    override def objectUrl(key: String): F[URL] =
+      F.delay(
+        transferManager
+          .getAmazonS3Client
+          .generatePresignedUrl(awsConfig.bucketName, key, expireTime(), HttpMethod.GET)
+      )
   }
 }
