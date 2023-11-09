@@ -8,6 +8,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Counts
 import ptpger.domain.TaskId
+import ptpger.domain.PersonId
 import ptpger.domain.args.tasks.TaskFilters
 import ptpger.persistence.Task
 private[repos] object TasksSql extends Sql[TaskId] {
@@ -51,16 +52,33 @@ private[repos] object TasksSql extends Sql[TaskId] {
 
   val count: Query[Void, Counts] =
     sql"""SELECT
-         COUNT(1) as count,
-         COUNT(1) filter (WHERE status = 'new') as "new",
-         COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
-         COUNT(1) filter (WHERE status = 'complete') as completed,
-         COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
-         COUNT(1) filter (WHERE status = 'rejected') as rejected,
-         COUNT(1) filter (WHERE status = 'approved') as approved,
-         COUNT(1) filter (WHERE status = 'expired') as expired
-         FROM tasks
+          COUNT(1) as count,
+          COUNT(1) filter (WHERE status = 'new') as "new",
+          COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
+          COUNT(1) filter (WHERE status = 'complete') as completed,
+          COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
+          COUNT(1) filter (WHERE status = 'rejected') as rejected,
+          COUNT(1) filter (WHERE status = 'approved') as approved,
+          COUNT(1) filter (WHERE status = 'expired') as expired
+          FROM tasks
        """.query(countsCodec)
+
+  // TODO remove code duplication
+  val countByUser: Query[PersonId, Counts] =
+    sql"""SELECT
+          COUNT(1) as count,
+          COUNT(1) filter (WHERE status = 'new') as "new",
+          COUNT(1) filter (WHERE status = 'in_progress') as in_progress,
+          COUNT(1) filter (WHERE status = 'complete') as completed,
+          COUNT(1) filter (WHERE status = 'on_hold') as on_hold,
+          COUNT(1) filter (WHERE status = 'rejected') as rejected,
+          COUNT(1) filter (WHERE status = 'approved') as approved,
+          COUNT(1) filter (WHERE status = 'expired') as expired
+          FROM tasks
+          INNER JOIN user_tasks
+          ON tasks.id = user_tasks.task_id
+          WHERE user_id  = ${UsersSql.id}
+      """.query(countsCodec)
 
   val findById: Query[TaskId, Task] =
     sql"""SELECT * FROM tasks WHERE id = $id LIMIT 1""".query(codec)

@@ -15,6 +15,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import ptpger.domain.Counts
 import ptpger.domain.TaskId
 import ptpger.domain.UserTask
+import ptpger.domain.PersonId
 import ptpger.domain.args.tasks.TaskFilters
 import ptpger.exception.AError
 import ptpger.persistence.Task
@@ -24,6 +25,7 @@ trait TasksRepository[F[_]] {
   def create(task: Task): F[Unit]
   def get(filters: TaskFilters): F[List[Task]]
   def getCounts: F[Counts]
+  def getCountsByUserId(userId: PersonId): F[Counts]
   def findById(taskId: TaskId): F[Option[Task]]
   def update(id: TaskId)(update: Task => F[Task]): F[Unit]
   def assign(userTasks: NonEmptyList[UserTask]): F[Unit]
@@ -45,6 +47,9 @@ object TasksRepository {
 
     override def getCounts: F[Counts] =
       TasksSql.count.queryUnique(Void)
+
+    override def getCountsByUserId(userId: PersonId): F[Counts] =
+      TasksSql.countByUser.queryUnique(userId)
 
     override def findById(taskId: TaskId): F[Option[Task]] =
       TasksSql.findById.queryOption(taskId)

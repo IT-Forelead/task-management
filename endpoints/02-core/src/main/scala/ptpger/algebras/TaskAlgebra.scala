@@ -41,6 +41,7 @@ trait TaskAlgebra[F[_]] {
   def create(taskInput: TaskInput): F[TaskId]
   def get(filters: TaskFilters): F[List[DTask]]
   def getCounts: F[Counts]
+  def getCountsByUserId(userId: PersonId): F[Counts]
   def update(
       id: TaskId,
       userId: PersonId,
@@ -108,6 +109,9 @@ object TaskAlgebra {
 
       override def getCounts: F[Counts] =
         tasksRepository.getCounts
+
+      override def getCountsByUserId(userId: PersonId): F[Counts] =
+        tasksRepository.getCountsByUserId(userId)
 
       override def update(
           id: TaskId,
