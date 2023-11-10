@@ -42,6 +42,10 @@ private[repos] object UsersSql extends Sql[PersonId] {
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =
     List(
       filters.id.map(sql"u.id = $id"),
+      filters.roles.map { roles =>
+        val roleList = roles.toList
+        sql"u.role in (${role.values.list(roleList)})".apply(roleList)
+      },
       filters.employment.map {
         case UserEmployment.Employed =>
           sql"ut.user_id IS NOT NULL".apply(Void)
