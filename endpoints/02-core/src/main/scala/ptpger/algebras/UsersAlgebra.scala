@@ -44,7 +44,7 @@ object UsersAlgebra {
             createdAt = now,
             firstname = userInput.firstname,
             lastname = userInput.lastname,
-            role = Role.Creator,
+            role = Role.Executor,
             phone = userInput.phone,
           )
           password <- randomStr[F](8)

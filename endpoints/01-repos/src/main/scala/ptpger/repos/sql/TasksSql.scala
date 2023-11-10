@@ -7,8 +7,8 @@ import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Counts
-import ptpger.domain.TaskId
 import ptpger.domain.PersonId
+import ptpger.domain.TaskId
 import ptpger.domain.args.tasks.TaskFilters
 import ptpger.persistence.Task
 private[repos] object TasksSql extends Sql[TaskId] {
@@ -28,25 +28,27 @@ private[repos] object TasksSql extends Sql[TaskId] {
       filters
         .assigned
         .flatMap(cond => Option.when(cond)(()))
-        .map(_ => sql"user_id IS NOT NULL".apply(Void)),
-//      filters.userId.map(sql"user_id = ${UsersSql.id}"),
-      filters.status.map(sql"status = $status"),
+        .map(_ => sql"ut.user_id IS NOT NULL".apply(Void)),
+      filters.userId.map(sql"ut.user_id = ${UsersSql.id}"),
+      filters.status.map(sql"t.status = $status"),
     ) :::
       filters.dueDate.toList.flatMap { dateRange =>
         List(
-          dateRange.from.map(sql"due_date >= $date"),
-          dateRange.to.map(sql"due_date <= $date"),
+          dateRange.from.map(sql"t.due_date >= $date"),
+          dateRange.to.map(sql"t.due_date <= $date"),
         )
       } :::
       filters.createdAt.toList.flatMap { dateRange =>
         List(
-          dateRange.from.map(sql"created_at >= $zonedDateTime"),
-          dateRange.to.map(sql"created_at <= $zonedDateTime"),
+          dateRange.from.map(sql"t.created_at >= $zonedDateTime"),
+          dateRange.to.map(sql"t.created_at <= $zonedDateTime"),
         )
       }
 
   def select(filters: TaskFilters): AppliedFragment = {
-    val baseQuery: Fragment[Void] = sql"""SELECT * FROM tasks"""
+    val baseQuery: Fragment[Void] =
+      sql"""SELECT DISTINCT ON(t.id) t.* FROM tasks t
+            LEFT JOIN user_tasks ut ON t.id = ut.task_id or ut.user_id IS NULL"""
     baseQuery(Void).whereAndOpt(searchFilter(filters))
   }
 
