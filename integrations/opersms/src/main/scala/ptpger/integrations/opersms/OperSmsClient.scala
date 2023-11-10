@@ -77,8 +77,6 @@ object OperSmsClient {
           config.password,
           NonEmptyList.one(SMS.unPlus(phone, text)),
         )
-        _ = println(sendSMS)
-        _ = println(config.apiURL)
         sms <- OptionT(client.request(sendSMS).map(_.headOption))
           .semiflatTap(smsResponse =>
             logger.info(

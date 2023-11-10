@@ -87,13 +87,10 @@ object TaskAlgebra {
         (for {
           tasks <- OptionT(tasksRepository.get(filters).map(NonEmptyList.fromList))
           userTasks <- OptionT.liftF(tasksRepository.getUserTasks(tasks.map(_.id)))
-          _ = println(s"userTasks: $userTasks")
           maybeUserIds = NonEmptyList.fromList(
             userTasks.values.toList.flatten.map(_.userId).distinct
           )
-          _ = println(s"maybeUserIds: $maybeUserIds")
           users <- OptionT.liftF(maybeUserIds.traverse(usersRepository.findByIds))
-          _ = println(s"users: $users")
         } yield tasks.toList.map { task =>
           val taskUsers =
             userTasks.getOrElse(task.id, Nil).flatMap(ut => users.flatMap(_.get(ut.userId)))
