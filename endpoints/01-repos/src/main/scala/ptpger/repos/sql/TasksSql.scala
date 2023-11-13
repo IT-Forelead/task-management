@@ -105,7 +105,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
             ON tasks.id = user_tasks.task_id
           INNER JOIN users
             ON user_tasks.user_id = users.id
-          GROUP BY users.firstname, users.lastname
+          GROUP BY users.id
          """.query(countsAllCodec)
 
   val findById: Query[TaskId, Task] =
