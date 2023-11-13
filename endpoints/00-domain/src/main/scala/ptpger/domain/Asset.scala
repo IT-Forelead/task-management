@@ -31,6 +31,7 @@ object Asset {
       public: Boolean,
       filename: Option[NonEmptyString],
       mediaType: NonEmptyString,
+      extension: NonEmptyString,
       url: URL,
     )
 

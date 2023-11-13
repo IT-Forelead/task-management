@@ -670,6 +670,7 @@ components:
         - createdAt
         - s3Key
         - public
+        - mediaType
       properties:
         id:
           type: string
@@ -682,6 +683,8 @@ components:
         public:
           type: boolean
         fileName:
+          type: string
+        mediaType:
           type: string
     AssetInput:
       type: object
@@ -701,10 +704,16 @@ components:
       required:
         - public
         - file
+        - mediaType
+        - extension
       properties:
         public:
           type: boolean
         filename:
+          type: string
+        mediaType:
+          type: string
+        extension:
           type: string
         url:
           type: string
