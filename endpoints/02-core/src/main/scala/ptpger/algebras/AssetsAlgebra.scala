@@ -102,7 +102,13 @@ object AssetsAlgebra {
           AError.Internal(s"File not found by assetId [$assetId]").raiseError[F, AssetInfo]
         ) { asset =>
           s3Client.objectUrl(asset.s3Key.value).map { url =>
-            AssetInfo(asset.public, asset.fileName, asset.mediaType, url)
+            AssetInfo(
+              asset.public,
+              asset.fileName,
+              asset.mediaType,
+              getFileType(asset.s3Key.value),
+              url,
+            )
           }
         }
 
