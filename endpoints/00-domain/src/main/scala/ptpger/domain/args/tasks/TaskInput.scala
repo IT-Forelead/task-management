@@ -3,6 +3,7 @@ package args.tasks
 
 import java.time.LocalDate
 
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -13,4 +14,5 @@ case class TaskInput(
     assetId: Option[AssetId],
     dueDate: LocalDate,
     description: NonEmptyString,
+    assigned: Option[NonEmptyList[PersonId]],
   )

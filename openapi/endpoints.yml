@@ -559,6 +559,11 @@ components:
           format: date
         description:
           type: string
+        assigned:
+          type: "array"
+          items:
+            type: string
+            format: uuid
     Counts:
       type: object
       required:

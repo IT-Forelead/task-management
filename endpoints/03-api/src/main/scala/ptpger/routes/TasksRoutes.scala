@@ -3,7 +3,6 @@ package ptpger.routes
 import cats.MonadThrow
 import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
-import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s.HttpRoutes
@@ -23,9 +22,9 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
   override val public: HttpRoutes[F] = HttpRoutes.empty[F]
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as _ =>
+    case ar @ POST -> Root / "create" as user =>
       ar.req.decodeR[TaskInput] { taskInput =>
-        tasks.create(taskInput).flatMap(Created(_))
+        tasks.create(taskInput, user.fullName).flatMap(Created(_))
       }
     case ar @ POST -> Root as _ =>
       ar.req.decodeR[TaskFilters] { filters =>
@@ -34,13 +33,13 @@ final case class TasksRoutes[F[_]: JsonDecoder: MonadThrow](
     case GET -> Root / "counts" as _ =>
       tasks.getCounts.flatMap(Ok(_))
     case GET -> Root / "counts" / UUIDVar(id) as _ =>
-        tasks.getCountsByUserId(PersonId(id)).flatMap(Ok(_))
+      tasks.getCountsByUserId(PersonId(id)).flatMap(Ok(_))
     case ar @ PUT -> Root / UUIDVar(id) as user =>
       ar.req.decodeR[TaskAssignInput] { taskAssignInput =>
         tasks.assign(
           id.coerce[TaskId],
           taskAssignInput.userIds,
-          NonEmptyString.unsafeFrom(user.firstname + " " + user.lastname),
+          user.fullName,
         ) >> Accepted()
       }
     case ar @ PUT -> Root / "edit" / UUIDVar(id) as user =>

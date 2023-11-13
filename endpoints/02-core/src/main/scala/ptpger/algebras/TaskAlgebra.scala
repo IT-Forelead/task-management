@@ -38,7 +38,7 @@ import ptpger.repos.UsersRepository
 import ptpger.utils.ID
 
 trait TaskAlgebra[F[_]] {
-  def create(taskInput: TaskInput): F[TaskId]
+  def create(taskInput: TaskInput, author: NonEmptyString): F[TaskId]
   def get(filters: TaskFilters): F[List[DTask]]
   def getCounts: F[Counts]
   def getCountsByUserId(userId: PersonId): F[Counts]
@@ -67,7 +67,7 @@ object TaskAlgebra {
       messages: MessagesAlgebra[F],
     ): TaskAlgebra[F] =
     new TaskAlgebra[F] {
-      override def create(taskInput: TaskInput): F[TaskId] =
+      override def create(taskInput: TaskInput, author: NonEmptyString): F[TaskId] =
         for {
           id <- ID.make[F, TaskId]
           now <- Calendar[F].currentZonedDateTime
@@ -81,6 +81,7 @@ object TaskAlgebra {
             description = taskInput.description,
           )
           _ <- tasksRepository.create(task)
+          _ <- taskInput.assigned.traverse(assign(id, _, author))
         } yield id
 
       override def get(filters: TaskFilters): F[List[DTask]] =
