@@ -1,18 +1,23 @@
 package ptpger.routes
 
 import cats.MonadThrow
-import cats.data.{NonEmptyList, OptionT}
+import cats.data.NonEmptyList
+import cats.data.OptionT
 import cats.effect.kernel.Concurrent
-import cats.implicits.{catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps}
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
 import io.estatico.newtype.ops._
 import org.http4s.AuthedRoutes
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.circe.JsonDecoder
-import org.http4s.headers.{`Content-Type`, `Transfer-Encoding`}
+import org.http4s.headers.`Content-Type`
+import org.http4s.headers.`Transfer-Encoding`
 import org.http4s.multipart.Multipart
 import uz.scala.http4s.syntax.all.http4SyntaxPartOps
 import uz.scala.http4s.utils.Routes
+
 import ptpger.algebras.AssetsAlgebra
 import ptpger.domain.Asset.AssetInput
 import ptpger.domain._
@@ -38,10 +43,11 @@ final case class RootRoutes[
     case GET -> Root / "assets" / "view" / UUIDVar(id) =>
       for {
         obj <- assets.downloadObject(id.coerce[AssetId])
+        (mediaType, file) = obj
       } yield Response(
-        body = obj,
+        body = file,
         headers = Headers(
-          `Content-Type`(MediaType.application.`octet-stream`),
+          `Content-Type`(MediaType.unsafeParse(mediaType.value)),
           `Transfer-Encoding`(TransferCoding.chunked.pure[NonEmptyList]),
         ),
       )
@@ -55,8 +61,9 @@ final case class RootRoutes[
           result <- OptionT(
             assets.uploadFile(multipart.parts.fileParts(AllowedMediaTypes: _*), assetInfo.public)
           )
-            .foldF(BadRequest("File part not exists!")) { fileKey =>
-              assets.create(assetInfo, fileKey).flatMap(Created(_))
+            .foldF(BadRequest("File part not exists!")) {
+              case (mediaType, fileKey) =>
+                assets.create(assetInfo, fileKey, mediaType).flatMap(Created(_))
             }
         } yield result
       }

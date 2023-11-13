@@ -1,14 +1,21 @@
 package ptpger.algebras
 
 import java.net.URL
+
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
-import cats.implicits.{catsSyntaxApplicativeErrorId, catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps, toTraverseOps}
+import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
+import cats.implicits.toTraverseOps
 import eu.timepit.refined.types.string.NonEmptyString
+import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.Part
 import uz.scala.aws.s3.S3Client
-import uz.scala.syntax.refined.commonSyntaxAutoRefineOptV
+import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import ptpger.domain.Asset
 import ptpger.domain.Asset.AssetInfo
 import ptpger.domain.Asset.AssetInput
@@ -20,14 +27,19 @@ import ptpger.repos.AssetsRepository
 import ptpger.utils.ID
 
 trait AssetsAlgebra[F[_]] {
-  def create(assetInfo: AssetInput, fileKey: NonEmptyString): F[AssetId]
+  def create(
+      assetInfo: AssetInput,
+      fileKey: String,
+      mediaType: String,
+    ): F[AssetId]
+
   def uploadFile(
       parts: Vector[Part[F]],
       public: Boolean,
-    ): F[Option[NonEmptyString]]
+    ): F[Option[(String, String)]]
   def getPublicUrl(assetIds: NonEmptyList[AssetId]): F[Map[AssetId, URL]]
   def getPublicUrl(assetId: AssetId): F[AssetInfo]
-  def downloadObject(assetId: AssetId): F[fs2.Stream[F, Byte]]
+  def downloadObject(assetId: AssetId): F[(NonEmptyString, fs2.Stream[F, Byte])]
 }
 object AssetsAlgebra {
   def make[F[_]: MonadThrow: GenUUID: Calendar: Lambda[M[_] => fs2.Compiler[M, M]]](
@@ -35,7 +47,11 @@ object AssetsAlgebra {
       s3Client: S3Client[F],
     ): AssetsAlgebra[F] =
     new AssetsAlgebra[F] {
-      override def create(assetInfo: AssetInput, fileKey: NonEmptyString): F[AssetId] =
+      override def create(
+          assetInfo: AssetInput,
+          fileKey: String,
+          mediaType: String,
+        ): F[AssetId] =
         for {
           id <- ID.make[F, AssetId]
           now <- Calendar[F].currentZonedDateTime
@@ -45,6 +61,7 @@ object AssetsAlgebra {
             s3Key = fileKey,
             public = assetInfo.public,
             fileName = assetInfo.filename,
+            mediaType = mediaType,
           )
           _ <- assetsRepository.create(asset)
         } yield id
@@ -52,12 +69,19 @@ object AssetsAlgebra {
       override def uploadFile(
           parts: Vector[Part[F]],
           public: Boolean,
-        ): F[Option[NonEmptyString]] = {
-        val files = parts.flatMap(p => p.filename.map(_ -> p.body).toVector)
+        ): F[Option[(String, String)]] = {
+        println(parts.map(_.headers.get[`Content-Type`]))
+        val files = parts.flatMap { part =>
+          for {
+            contentType <- part.headers.get[`Content-Type`]
+            filename <- part.filename
+            mediaType = s"${contentType.mediaType.mainType}/${contentType.mediaType.subType}"
+          } yield filename -> mediaType -> part.body
+        }
         files
           .traverse {
-            case (filename, body) =>
-              body.through(uploadToS3(filename, public))
+            case filename -> mediaType -> body =>
+              body.through(uploadToS3(filename, public)).map(mediaType -> _)
           }
           .compile
           .toVector
@@ -72,20 +96,23 @@ object AssetsAlgebra {
               s3Client.objectUrl(asset.s3Key.value).map(assetId -> _)
           }
         } yield assetUrls.toMap
+
       override def getPublicUrl(assetId: AssetId): F[AssetInfo] =
         OptionT(assetsRepository.findAsset(assetId)).foldF(
           AError.Internal(s"File not found by assetId [$assetId]").raiseError[F, AssetInfo]
         ) { asset =>
           s3Client.objectUrl(asset.s3Key.value).map { url =>
-            AssetInfo(asset.public, asset.fileName, url)
+            AssetInfo(asset.public, asset.fileName, asset.mediaType, url)
           }
         }
 
-      override def downloadObject(assetId: AssetId): F[fs2.Stream[F, Byte]] =
+      override def downloadObject(assetId: AssetId): F[(NonEmptyString, fs2.Stream[F, Byte])] =
         OptionT(assetsRepository.findAsset(assetId)).foldF(
-          AError.Internal(s"File not found by assetId [$assetId]").raiseError[F, fs2.Stream[F, Byte]]
+          AError
+            .Internal(s"File not found by assetId [$assetId]")
+            .raiseError[F, (NonEmptyString, fs2.Stream[F, Byte])]
         ) { asset =>
-          s3Client.downloadObject(asset.s3Key.value).pure[F]
+          (asset.mediaType -> s3Client.downloadObject(asset.s3Key.value)).pure[F]
         }
 
       private def getFileType(filename: String): String = {

@@ -11,8 +11,8 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 import uz.scala.http4s.utils.MapConvert
 import uz.scala.http4s.utils.MapConvert.ValidationResult
-import uz.scala.syntax.refined._
 import uz.scala.syntax.circe._
+import uz.scala.syntax.refined._
 
 @JsonCodec
 case class Asset(
@@ -21,6 +21,7 @@ case class Asset(
     s3Key: NonEmptyString,
     public: Boolean,
     fileName: Option[NonEmptyString],
+    mediaType: NonEmptyString,
   )
 
 object Asset {
@@ -29,6 +30,7 @@ object Asset {
   case class AssetInfo(
       public: Boolean,
       filename: Option[NonEmptyString],
+      mediaType: NonEmptyString,
       url: URL,
     )
 

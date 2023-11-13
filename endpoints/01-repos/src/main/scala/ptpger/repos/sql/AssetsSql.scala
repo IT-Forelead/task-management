@@ -8,7 +8,7 @@ import ptpger.domain.Asset
 import ptpger.domain.AssetId
 
 private[repos] object AssetsSql extends Sql[AssetId] {
-  private val codec: Codec[Asset] = (id *: zonedDateTime *: nes *: bool *: nes.opt).to[Asset]
+  private val codec: Codec[Asset] = (id *: zonedDateTime *: nes *: bool *: nes.opt *: nes).to[Asset]
   val insert: Command[Asset] =
     sql"""INSERT INTO assets VALUES ($codec)""".command
 
