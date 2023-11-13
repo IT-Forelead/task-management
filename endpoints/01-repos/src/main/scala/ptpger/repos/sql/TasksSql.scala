@@ -3,10 +3,12 @@ package ptpger.repos.sql
 import skunk._
 import skunk.codec.all.date
 import skunk.codec.all.int8
+import skunk.codec.all.varchar
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import ptpger.domain.Counts
+import ptpger.domain.CountsAll
 import ptpger.domain.PersonId
 import ptpger.domain.TaskId
 import ptpger.domain.args.tasks.TaskFilters
@@ -19,6 +21,10 @@ private[repos] object TasksSql extends Sql[TaskId] {
   private[repos] val countsCodec =
     (int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8)
       .to[Counts]
+
+  private[repos] val countsAllCodec =
+    (varchar *: varchar *: int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8 *: int8)
+      .to[CountsAll]
 
   val insert: Command[Task] =
     sql"""INSERT INTO tasks VALUES ($codec)""".command
@@ -81,6 +87,26 @@ private[repos] object TasksSql extends Sql[TaskId] {
           ON tasks.id = user_tasks.task_id
           WHERE user_id  = ${UsersSql.id}
       """.query(countsCodec)
+
+  val countAll: Query[Void, CountsAll] =
+    sql"""SELECT
+            users.firstname,
+            users.lastname,
+            COUNT(1) AS count,
+            COUNT(1) FILTER (WHERE status = 'new') AS "new",
+            COUNT(1) FILTER (WHERE status = 'in_progress') AS in_progress,
+            COUNT(1) FILTER (WHERE status = 'complete') AS completed,
+            COUNT(1) FILTER (WHERE status = 'on_hold') AS on_hold,
+            COUNT(1) FILTER (WHERE status = 'rejected') AS rejected,
+            COUNT(1) FILTER (WHERE status = 'approved') AS approved,
+            COUNT(1) FILTER (WHERE status = 'expired') AS expired
+          FROM tasks
+          INNER JOIN user_tasks
+            ON tasks.id = user_tasks.task_id
+          INNER JOIN users
+            ON user_tasks.user_id = users.id
+          GROUP BY users.id
+         """.query(countsAllCodec)
 
   val findById: Query[TaskId, Task] =
     sql"""SELECT * FROM tasks WHERE id = $id LIMIT 1""".query(codec)

@@ -16,6 +16,7 @@ import ptpger.AppDomain
 import ptpger.domain.ActionHistory
 import ptpger.domain.Comment
 import ptpger.domain.Counts
+import ptpger.domain.CountsAll
 import ptpger.domain.PersonId
 import ptpger.domain.TaskId
 import ptpger.domain.UserTask
@@ -42,6 +43,7 @@ trait TaskAlgebra[F[_]] {
   def get(filters: TaskFilters): F[List[DTask]]
   def getCounts: F[Counts]
   def getCountsByUserId(userId: PersonId): F[Counts]
+  def getCountsAll: F[List[CountsAll]]
   def update(
       id: TaskId,
       userId: PersonId,
@@ -113,6 +115,9 @@ object TaskAlgebra {
 
       override def getCountsByUserId(userId: PersonId): F[Counts] =
         tasksRepository.getCountsByUserId(userId)
+
+      override def getCountsAll: F[List[CountsAll]] =
+        tasksRepository.getCountsAll
 
       override def update(
           id: TaskId,

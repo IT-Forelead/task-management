@@ -95,9 +95,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Counts"
+                $ref: "#/components/schemas/Counts"
         "403":
           description: Bearer token not found
   /tasks/counts/{userId}:
@@ -123,9 +121,27 @@ paths:
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/Counts"
+        "403":
+          description: Bearer token not found
+  /tasks/counts/all:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - tasks
+      summary: statistics for all tasks
+      description: "Fetch statistics for all tasks"
+      operationId: getCountsAll
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Counts"
+                  $ref: "#/components/schemas/CountsAll"
         "403":
           description: Bearer token not found
   /tasks/create:
@@ -576,6 +592,48 @@ components:
         - approved
         - expired
       properties:
+        count:
+          type: integer
+          format: int32
+        new:
+          type: integer
+          format: int32
+        inProgress:
+          type: integer
+          format: int32
+        completed:
+          type: integer
+          format: int32
+        onHold:
+          type: integer
+          format: int32
+        rejected:
+          type: integer
+          format: int32
+        approved:
+          type: integer
+          format: int32
+        expired:
+          type: integer
+          format: int32
+    CountsAll:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - count
+        - new
+        - inProgress
+        - completed
+        - onHold
+        - rejected
+        - approved
+        - expired
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
         count:
           type: integer
           format: int32
