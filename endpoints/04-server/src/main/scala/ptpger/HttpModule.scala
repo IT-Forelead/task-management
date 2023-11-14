@@ -31,6 +31,7 @@ object HttpModule {
         new TasksRoutes[F](env.algebras.tasks),
         new RootRoutes[F](env.algebras.assets),
         new UsersRoutes[F](env.algebras.users),
+        new MessagesRoutes[F](env.algebras.messages),
       )
       .map { r =>
         Router(

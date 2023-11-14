@@ -17,6 +17,7 @@ import ptpger.utils.ID
 
 trait MessagesAlgebra[F[_]] {
   def sendSms(phone: Phone, text: NonEmptyString): F[MessageId]
+  def get: F[List[Message]]
 }
 object MessagesAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID](
@@ -42,5 +43,8 @@ object MessagesAlgebra {
             deliveryStatus => messagesRepository.update(id)(DeliveryStatus.fromApi(deliveryStatus)),
           )
         } yield id
+
+      override def get: F[List[Message]] =
+        messagesRepository.get
     }
 }

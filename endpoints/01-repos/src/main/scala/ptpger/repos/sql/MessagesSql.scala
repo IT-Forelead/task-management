@@ -15,7 +15,7 @@ private[repos] object MessagesSql extends Sql[MessageId] {
     sql"""INSERT INTO messages VALUES ($codec)""".command
 
   val get: Query[Void, Message] =
-    sql"""SELECT * FROM sms_messages ORDER BY created_at DESC""".query(codec)
+    sql"""SELECT * FROM messages ORDER BY created_at DESC""".query(codec)
 
   val update: Command[DeliveryStatus *: MessageId *: EmptyTuple] =
     sql"""UPDATE messages SET status = $deliveryStatus WHERE id = $id"""

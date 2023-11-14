@@ -4,6 +4,7 @@ import cats.effect.Async
 import cats.effect.Resource
 import skunk._
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
+import uz.scala.skunk.syntax.all.skunkSyntaxQueryVoidOps
 
 import ptpger.domain.Message
 import ptpger.domain.MessageId
@@ -12,6 +13,7 @@ import ptpger.repos.sql.MessagesSql
 trait MessagesRepository[F[_]] {
   def create(message: Message): F[Unit]
   def update(messageId: MessageId)(status: DeliveryStatus): F[Unit]
+  def get: F[List[Message]]
 }
 
 object MessagesRepository {
@@ -23,5 +25,7 @@ object MessagesRepository {
       MessagesSql.insert.execute(message)
     override def update(messageId: MessageId)(status: DeliveryStatus): F[Unit] =
       MessagesSql.update.execute(status *: messageId *: EmptyTuple)
+    override def get: F[List[Message]] =
+      MessagesSql.get.all
   }
 }
