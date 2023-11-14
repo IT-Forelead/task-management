@@ -53,7 +53,7 @@ private[repos] object TasksSql extends Sql[TaskId] {
 
   def select(filters: TaskFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
-      sql"""SELECT DISTINCT ON(t.id) t.* FROM tasks t
+      sql"""SELECT DISTINCT ON(t.id) t.*, COUNT(*) OVER() AS total FROM tasks t
             LEFT JOIN user_tasks ut ON t.id = ut.task_id or ut.user_id IS NULL"""
     baseQuery(Void).whereAndOpt(searchFilter(filters))
   }

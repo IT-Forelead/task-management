@@ -75,9 +75,18 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Task"
+                type: object
+                required:
+                  - data
+                  - total
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Task"
+                  total:
+                    type: integer
+                    format: int64
         "403":
           description: Bearer token not found
   /tasks/counts:
@@ -503,6 +512,12 @@ components:
           format: date-time
         assigned:
           type: boolean
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
     Task:
       type: object
       required:
