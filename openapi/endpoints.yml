@@ -403,9 +403,18 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/User"
+                type: object
+                required:
+                  - data
+                  - total
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/User"
+                  total:
+                    type: integer
+                    format: int64
         "403":
           description: Bearer token not found
         "422":
@@ -438,22 +447,38 @@ paths:
         "422":
           description: invalid json entered
   /messages:
-    get:
+    post:
       security:
         - bearerAuth: [ ]
       tags:
         - messages
       description: "Get messages"
       operationId: getMessages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageFilters"
+        description: filters
+        required: true
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Message"
+                type: object
+                required:
+                  - data
+                  - total
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Message"
+                  total:
+                    type: integer
+                    format: int64
         "403":
           description: Bearer token not found
         "422":
@@ -863,6 +888,12 @@ components:
           enum:
             - employed
             - unemployed
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
     UserInput:
       type: object
       required:
@@ -915,3 +946,12 @@ components:
             - failed
             - transmitted
             - undefined
+    MessageFilters:
+      type: object
+      properties:
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32

@@ -8,6 +8,8 @@ import eu.timepit.refined.types.string.NonEmptyString
 import ptpger.Phone
 import ptpger.domain.Message
 import ptpger.domain.MessageId
+import ptpger.domain.ResponseData
+import ptpger.domain.args.messages.MessageFilter
 import ptpger.domain.enums.DeliveryStatus
 import ptpger.effects.Calendar
 import ptpger.effects.GenUUID
@@ -17,7 +19,7 @@ import ptpger.utils.ID
 
 trait MessagesAlgebra[F[_]] {
   def sendSms(phone: Phone, text: NonEmptyString): F[MessageId]
-  def get: F[List[Message]]
+  def get(filters: MessageFilter): F[ResponseData[Message]]
 }
 object MessagesAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID](
@@ -44,7 +46,7 @@ object MessagesAlgebra {
           )
         } yield id
 
-      override def get: F[List[Message]] =
-        messagesRepository.get
+      override def get(filter: MessageFilter): F[ResponseData[Message]] =
+        messagesRepository.get(filter)
     }
 }

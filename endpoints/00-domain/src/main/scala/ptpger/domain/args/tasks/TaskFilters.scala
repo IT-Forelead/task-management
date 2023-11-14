@@ -1,7 +1,7 @@
 package ptpger.domain
 package args.tasks
 
-import eu.timepit.refined.types.all.NonNegInt
+import eu.timepit.refined.types.all.PosInt
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
@@ -17,6 +17,6 @@ case class TaskFilters(
     dueDate: Option[DateRange] = None,
     createdAt: Option[DateTimeRange] = None,
     assigned: Option[Boolean] = None,
-    limit: Option[NonNegInt],
-    offset: Option[NonNegInt],
+    limit: Option[PosInt],
+    offset: Option[PosInt],
   )

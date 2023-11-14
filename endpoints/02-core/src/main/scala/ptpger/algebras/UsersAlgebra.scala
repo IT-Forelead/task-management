@@ -10,6 +10,7 @@ import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import ptpger.domain.AuthedUser.User
 import ptpger.domain.PersonId
+import ptpger.domain.ResponseData
 import ptpger.domain.args.users.UserFilters
 import ptpger.domain.args.users.UserInput
 import ptpger.domain.auth.AccessCredentials
@@ -21,7 +22,7 @@ import ptpger.repos.UsersRepository
 import ptpger.utils.ID
 
 trait UsersAlgebra[F[_]] {
-  def get(filters: UserFilters): F[List[User]]
+  def get(filters: UserFilters): F[ResponseData[User]]
   def create(userInput: UserInput): F[PersonId]
 }
 object UsersAlgebra {
@@ -32,7 +33,7 @@ object UsersAlgebra {
       P: PasswordHasher[F, SCrypt]
     ): UsersAlgebra[F] =
     new UsersAlgebra[F] {
-      override def get(filters: UserFilters): F[List[User]] =
+      override def get(filters: UserFilters): F[ResponseData[User]] =
         usersRepository.get(filters)
 
       override def create(userInput: UserInput): F[PersonId] =

@@ -13,6 +13,7 @@ import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
+import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import ptpger.domain.Counts
 import ptpger.domain.CountsAll
@@ -46,7 +47,9 @@ object TasksRepository {
       TasksSql.insert.execute(task)
 
     override def get(filters: TaskFilters): F[ResponseData[Task]] = {
-      val query = TasksSql.select(filters).paginateOpt(filters.limit, filters.offset)
+      val query = TasksSql
+        .select(filters)
+        .paginateOpt(filters.limit.map(_.value), filters.offset.map(_.value))
       query.fragment.query(TasksSql.codec *: int8).queryList(query.argument).map { tasks =>
         ResponseData(tasks.map(_.head), tasks.headOption.fold(0L)(_.tail.head))
       }
