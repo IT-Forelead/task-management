@@ -585,11 +585,11 @@ components:
         executors:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/User"
         controllers:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/User"
     TaskUpdateInput:
       type: object
       required:
@@ -846,6 +846,7 @@ components:
         - lastname
         - role
         - phone
+        - fullname
       properties:
         id:
           type: string
@@ -866,6 +867,8 @@ components:
             - executor
             - controller
         phone:
+          type: string
+        fullname:
           type: string
     UserFilters:
       type: object

@@ -7,6 +7,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
+import ptpger.domain.AuthedUser.User
 import ptpger.domain.enums.TaskStatus
 @JsonCodec
 case class Task(
@@ -17,6 +18,6 @@ case class Task(
     status: TaskStatus,
     description: NonEmptyString,
     assetId: Option[AssetId],
-    executors: List[NonEmptyString],
-    controllers: List[NonEmptyString],
+    executors: List[User],
+    controllers: List[User],
   )

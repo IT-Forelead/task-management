@@ -98,8 +98,8 @@ object TaskAlgebra {
               status = task.status,
               description = task.description,
               assetId = task.assetId,
-              executors = taskUsers.filter(_.role == Role.Executor).map(_.fullName),
-              controllers = taskUsers.filter(_.role == Role.Controller).map(_.fullName),
+              executors = taskUsers.filter(_.role == Role.Executor),
+              controllers = taskUsers.filter(_.role == Role.Controller),
             )
           }
         } yield taskResponse.copy(data = dTasks)).getOrElse(ResponseData.empty[DTask])
